@@ -49,5 +49,47 @@ interface TmdbApiService {
         @Query("language") language: String = "en-US",
         @Query("append_to_response") appendToResponse: String = "videos,credits"
     ): SeriesDetailDto
+
+
+    // Top Rated
+    @GET("movie/top_rated")
+    suspend fun getTopRatedMovies(
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US"
+    ): MoviesResponseDto
+
+    @GET("tv/top_rated")
+    suspend fun getTopRatedSeries(
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US"
+    ): SeriesResponseDto
+
+    // Now Playing / On The Air
+    @GET("movie/now_playing")
+    suspend fun getNowPlayingMovies(
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US"
+    ): MoviesResponseDto
+
+    @GET("tv/on_the_air")
+    suspend fun getOnTheAirSeries(
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US"
+    ): SeriesResponseDto
+
+    // Browse by Genre
+    @GET("discover/movie")
+    suspend fun getMoviesByGenre(
+        @Query("with_genres") genreId: Int,
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US"
+    ): MoviesResponseDto
+
+    @GET("discover/tv")
+    suspend fun getSeriesByGenre(
+        @Query("with_genres") genreId: Int,
+        @Query("page") page: Int = 1,
+        @Query("language") language: String = "en-US"
+    ): SeriesResponseDto
 }
 

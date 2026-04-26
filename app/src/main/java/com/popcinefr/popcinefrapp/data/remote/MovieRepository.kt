@@ -61,4 +61,52 @@ class MovieRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun getTopRatedMovies(): Result<List<MovieDto>> {
+        return try {
+            Result.success(api.getTopRatedMovies().results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getTopRatedSeries(): Result<List<SeriesDto>> {
+        return try {
+            Result.success(api.getTopRatedSeries().results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getNowPlayingMovies(): Result<List<MovieDto>> {
+        return try {
+            Result.success(api.getNowPlayingMovies().results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getOnTheAirSeries(): Result<List<SeriesDto>> {
+        return try {
+            Result.success(api.getOnTheAirSeries().results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getMoviesByGenre(genreId: Int): Result<List<MovieDto>> {
+        return try {
+            Result.success(api.getMoviesByGenre(genreId).results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getSeriesByGenre(genreId: Int): Result<List<SeriesDto>> {
+        return try {
+            Result.success(api.getSeriesByGenre(genreId).results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

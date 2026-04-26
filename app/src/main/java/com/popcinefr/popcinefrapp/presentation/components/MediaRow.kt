@@ -3,9 +3,9 @@ package com.popcinefr.popcinefrapp.presentation.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,33 +15,60 @@ import com.popcinefr.popcinefrapp.util.UiState
 
 @Composable
 fun <T> MediaSection(
-    title: String,                          // e.g. "Trending Movies"
-    uiState: UiState<List<T>>,             // Loading / Success / Error
-    itemKey: (T) -> Int,                   // unique ID for each item
-    itemTitle: (T) -> String,              // how to get title from item
-    itemPoster: (T) -> String?,            // how to get poster from item
-    itemRating: (T) -> Double,             // how to get rating from item
-    onItemClick: (T) -> Unit
+    title: String,
+    uiState: UiState<List<T>>,
+    itemKey: (T) -> Int,
+    itemTitle: (T) -> String,
+    itemPoster: (T) -> String?,
+    itemRating: (T) -> Double,
+    onItemClick: (T) -> Unit,
+    // Optional — if provided shows the "See All" button
+    onSeeAllClick: (() -> Unit)? = null
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        // Section title
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+        // Section header row — title on left, See All on right
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
 
-        // Handle each state
+            // Only show See All if a click handler was provided
+            if (onSeeAllClick != null) {
+                TextButton(
+                    onClick = onSeeAllClick,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(
+                        text = "See All",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Icon(
+                        imageVector = Icons.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+
         when (uiState) {
-
             is UiState.Loading -> {
-                // Show a spinner while loading
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp),
+                        .height(240.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -49,11 +76,10 @@ fun <T> MediaSection(
             }
 
             is UiState.Error -> {
-                // Show error message
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp),
+                        .height(240.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -64,15 +90,13 @@ fun <T> MediaSection(
             }
 
             is UiState.Success -> {
-                // LazyRow = horizontal scrolling list
-                // "Lazy" means it only renders cards visible on screen — efficient!
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(
                         items = uiState.data,
-                        key = { itemKey(it) }  // unique key helps Compose update efficiently
+                        key = { itemKey(it) }
                     ) { item ->
                         MediaCard(
                             title = itemTitle(item),
