@@ -42,4 +42,23 @@ class MovieRepository {
             Result.failure(e)
         }
     }
+
+
+    suspend fun getMovieDetail(movieId: Int): Result<MovieDetailDto> {
+        return try {
+            val response = api.getMovieDetail(movieId)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getSeriesDetail(seriesId: Int): Result<SeriesDetailDto> {
+        return try {
+            val response = api.getSeriesDetail(seriesId)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
