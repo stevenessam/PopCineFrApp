@@ -37,7 +37,7 @@ fun NavGraph() {
             modifier = Modifier.padding(paddingValues)
         ) {
 
-            // Home Screen
+            // Home
             composable(Screen.Home.route) {
                 HomeScreen(
                     onMovieClick = { id ->
@@ -51,11 +51,21 @@ fun NavGraph() {
                     },
                     onSeeAllSeries = { category ->
                         navController.navigate(Screen.SeeAllSeries.createRoute(category))
+                    },
+                    onSeeAllMoviesByGenre = { genreId, genreName ->
+                        navController.navigate(
+                            Screen.SeeAllMoviesByGenre.createRoute(genreId, genreName)
+                        )
+                    },
+                    onSeeAllSeriesByGenre = { genreId, genreName ->
+                        navController.navigate(
+                            Screen.SeeAllSeriesByGenre.createRoute(genreId, genreName)
+                        )
                     }
                 )
             }
 
-            // Search Screen
+            // Search
             composable(Screen.Search.route) {
                 SearchScreen(
                     onMovieClick = { id ->
@@ -67,7 +77,7 @@ fun NavGraph() {
                 )
             }
 
-            // Favorites Screen
+            // Favorites
             composable(Screen.Favorites.route) {
                 FavoritesScreen(
                     onMovieClick = { id ->
@@ -79,12 +89,10 @@ fun NavGraph() {
                 )
             }
 
-            // Movie Detail Screen
+            // Movie Detail
             composable(
                 route = Screen.MovieDetail.route,
-                arguments = listOf(
-                    navArgument("id") { type = NavType.IntType }
-                )
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
             ) { backStackEntry ->
                 val movieId = backStackEntry.arguments?.getInt("id") ?: return@composable
                 MovieDetailScreen(
@@ -93,12 +101,10 @@ fun NavGraph() {
                 )
             }
 
-            // Series Detail Screen
+            // Series Detail
             composable(
                 route = Screen.SeriesDetail.route,
-                arguments = listOf(
-                    navArgument("id") { type = NavType.IntType }
-                )
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
             ) { backStackEntry ->
                 val seriesId = backStackEntry.arguments?.getInt("id") ?: return@composable
                 SeriesDetailScreen(
@@ -107,20 +113,16 @@ fun NavGraph() {
                 )
             }
 
-            // See All Movies Screen
+            // See All Movies
             composable(
                 route = Screen.SeeAllMovies.route,
-                arguments = listOf(
-                    navArgument("category") { type = NavType.StringType }
-                )
+                arguments = listOf(navArgument("category") { type = NavType.StringType })
             ) { backStackEntry ->
                 val category = backStackEntry.arguments?.getString("category") ?: return@composable
                 val viewModel: HomeViewModel = viewModel()
                 val seeAllState by viewModel.seeAllMovies.collectAsState()
 
-                LaunchedEffect(category) {
-                    viewModel.loadSeeAllMovies(category)
-                }
+                LaunchedEffect(category) { viewModel.loadSeeAllMovies(category) }
 
                 SeeAllScreen(
                     title = when (category) {
@@ -134,27 +136,21 @@ fun NavGraph() {
                     itemTitle = { it.title },
                     itemPoster = { it.posterPath },
                     itemRating = { it.voteAverage },
-                    onItemClick = { movie ->
-                        navController.navigate(Screen.MovieDetail.createRoute(movie.id))
-                    },
+                    onItemClick = { navController.navigate(Screen.MovieDetail.createRoute(it.id)) },
                     onBackClick = { navController.popBackStack() }
                 )
             }
 
-            // See All Series Screen
+            // See All Series
             composable(
                 route = Screen.SeeAllSeries.route,
-                arguments = listOf(
-                    navArgument("category") { type = NavType.StringType }
-                )
+                arguments = listOf(navArgument("category") { type = NavType.StringType })
             ) { backStackEntry ->
                 val category = backStackEntry.arguments?.getString("category") ?: return@composable
                 val viewModel: HomeViewModel = viewModel()
                 val seeAllState by viewModel.seeAllSeries.collectAsState()
 
-                LaunchedEffect(category) {
-                    viewModel.loadSeeAllSeries(category)
-                }
+                LaunchedEffect(category) { viewModel.loadSeeAllSeries(category) }
 
                 SeeAllScreen(
                     title = when (category) {
@@ -168,9 +164,61 @@ fun NavGraph() {
                     itemTitle = { it.name },
                     itemPoster = { it.posterPath },
                     itemRating = { it.voteAverage },
-                    onItemClick = { series ->
-                        navController.navigate(Screen.SeriesDetail.createRoute(series.id))
-                    },
+                    onItemClick = { navController.navigate(Screen.SeriesDetail.createRoute(it.id)) },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            // See All Movies by Genre
+            composable(
+                route = Screen.SeeAllMoviesByGenre.route,
+                arguments = listOf(
+                    navArgument("genreId") { type = NavType.IntType },
+                    navArgument("genreName") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val genreId = backStackEntry.arguments?.getInt("genreId") ?: return@composable
+                val genreName = backStackEntry.arguments?.getString("genreName") ?: return@composable
+                val viewModel: HomeViewModel = viewModel()
+                val seeAllState by viewModel.seeAllMoviesByGenre.collectAsState()
+
+                LaunchedEffect(genreId) { viewModel.loadSeeAllMoviesByGenre(genreId) }
+
+                SeeAllScreen(
+                    title = "🎭 $genreName Movies",
+                    uiState = seeAllState,
+                    itemKey = { it.id },
+                    itemTitle = { it.title },
+                    itemPoster = { it.posterPath },
+                    itemRating = { it.voteAverage },
+                    onItemClick = { navController.navigate(Screen.MovieDetail.createRoute(it.id)) },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            // See All Series by Genre
+            composable(
+                route = Screen.SeeAllSeriesByGenre.route,
+                arguments = listOf(
+                    navArgument("genreId") { type = NavType.IntType },
+                    navArgument("genreName") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val genreId = backStackEntry.arguments?.getInt("genreId") ?: return@composable
+                val genreName = backStackEntry.arguments?.getString("genreName") ?: return@composable
+                val viewModel: HomeViewModel = viewModel()
+                val seeAllState by viewModel.seeAllSeriesByGenre.collectAsState()
+
+                LaunchedEffect(genreId) { viewModel.loadSeeAllSeriesByGenre(genreId) }
+
+                SeeAllScreen(
+                    title = "🎭 $genreName Series",
+                    uiState = seeAllState,
+                    itemKey = { it.id },
+                    itemTitle = { it.name },
+                    itemPoster = { it.posterPath },
+                    itemRating = { it.voteAverage },
+                    onItemClick = { navController.navigate(Screen.SeriesDetail.createRoute(it.id)) },
                     onBackClick = { navController.popBackStack() }
                 )
             }

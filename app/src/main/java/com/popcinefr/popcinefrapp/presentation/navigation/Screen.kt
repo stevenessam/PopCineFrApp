@@ -27,6 +27,16 @@ sealed class Screen(val route: String) {
     object SeeAllSeries : Screen("see_all_series/{category}") {
         fun createRoute(category: String) = "see_all_series/$category"
     }
+
+    object SeeAllMoviesByGenre : Screen("see_all_movies_genre/{genreId}/{genreName}") {
+        fun createRoute(genreId: Int, genreName: String) =
+            "see_all_movies_genre/$genreId/$genreName"
+    }
+
+    object SeeAllSeriesByGenre : Screen("see_all_series_genre/{genreId}/{genreName}") {
+        fun createRoute(genreId: Int, genreName: String) =
+            "see_all_series_genre/$genreId/$genreName"
+    }
 }
 
 data class BottomNavItem(

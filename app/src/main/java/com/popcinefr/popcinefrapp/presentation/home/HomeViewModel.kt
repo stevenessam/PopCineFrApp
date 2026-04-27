@@ -57,6 +57,12 @@ class HomeViewModel : ViewModel() {
     private val _seeAllSeries = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
     val seeAllSeries: StateFlow<UiState<List<SeriesDto>>> = _seeAllSeries
 
+    private val _seeAllMoviesByGenre = MutableStateFlow<UiState<List<MovieDto>>>(UiState.Loading)
+    val seeAllMoviesByGenre: StateFlow<UiState<List<MovieDto>>> = _seeAllMoviesByGenre
+
+    private val _seeAllSeriesByGenre = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
+    val seeAllSeriesByGenre: StateFlow<UiState<List<SeriesDto>>> = _seeAllSeriesByGenre
+
     // --- Genre selection ---
     val selectedMovieGenre = MutableStateFlow(movieGenres.first())
     val selectedSeriesGenre = MutableStateFlow(seriesGenres.first())
@@ -142,46 +148,33 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _seeAllMovies.value = UiState.Loading
             try {
-                // async launches coroutines in parallel and waits for all results
-                val page1 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingMovies()
-                        "top_rated" -> api.getTopRatedMovies(1)
-                        "now_playing" -> api.getNowPlayingMovies(1)
-                        else -> api.getTrendingMovies()
+                val results = when (category) {
+                    "trending" -> {
+                        // Trending only has 1 page — load it once
+                        api.getTrendingMovies().results
+                            .distinctBy { it.id }
                     }
-                }
-                val page2 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingMovies()
-                        "top_rated" -> api.getTopRatedMovies(2)
-                        "now_playing" -> api.getNowPlayingMovies(2)
-                        else -> api.getTrendingMovies()
+                    "top_rated" -> {
+                        // Wait for ALL pages to finish before emitting Success
+                        val p1 = async { api.getTopRatedMovies(1).results }
+                        val p2 = async { api.getTopRatedMovies(2).results }
+                        val p3 = async { api.getTopRatedMovies(3).results }
+                        val p4 = async { api.getTopRatedMovies(4).results }
+                        (p1.await() + p2.await() + p3.await() + p4.await())
+                            .distinctBy { it.id }
                     }
-                }
-                val page3 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingMovies()
-                        "top_rated" -> api.getTopRatedMovies(3)
-                        "now_playing" -> api.getNowPlayingMovies(3)
-                        else -> api.getTrendingMovies()
+                    "now_playing" -> {
+                        val p1 = async { api.getNowPlayingMovies(1).results }
+                        val p2 = async { api.getNowPlayingMovies(2).results }
+                        val p3 = async { api.getNowPlayingMovies(3).results }
+                        val p4 = async { api.getNowPlayingMovies(4).results }
+                        (p1.await() + p2.await() + p3.await() + p4.await())
+                            .distinctBy { it.id }
                     }
+                    else -> api.getTrendingMovies().results.distinctBy { it.id }
                 }
-                val page4 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingMovies()
-                        "top_rated" -> api.getTopRatedMovies(4)
-                        "now_playing" -> api.getNowPlayingMovies(4)
-                        else -> api.getTrendingMovies()
-                    }
-                }
-                // await() waits for each page to finish then we combine all results
-                val combined = page1.await().results +
-                        page2.await().results +
-                        page3.await().results +
-                        page4.await().results
-
-                _seeAllMovies.value = UiState.Success(combined)
+                // Only set Success AFTER all pages are combined and deduplicated
+                _seeAllMovies.value = UiState.Success(results)
             } catch (e: Exception) {
                 _seeAllMovies.value = UiState.Error(e.message ?: "Error")
             }
@@ -192,46 +185,66 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _seeAllSeries.value = UiState.Loading
             try {
-                val page1 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingSeries()
-                        "top_rated" -> api.getTopRatedSeries(1)
-                        "on_the_air" -> api.getOnTheAirSeries(1)
-                        else -> api.getTrendingSeries()
+                val results = when (category) {
+                    "trending" -> {
+                        api.getTrendingSeries().results
+                            .distinctBy { it.id }
                     }
-                }
-                val page2 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingSeries()
-                        "top_rated" -> api.getTopRatedSeries(2)
-                        "on_the_air" -> api.getOnTheAirSeries(2)
-                        else -> api.getTrendingSeries()
+                    "top_rated" -> {
+                        val p1 = async { api.getTopRatedSeries(1).results }
+                        val p2 = async { api.getTopRatedSeries(2).results }
+                        val p3 = async { api.getTopRatedSeries(3).results }
+                        val p4 = async { api.getTopRatedSeries(4).results }
+                        (p1.await() + p2.await() + p3.await() + p4.await())
+                            .distinctBy { it.id }
                     }
-                }
-                val page3 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingSeries()
-                        "top_rated" -> api.getTopRatedSeries(3)
-                        "on_the_air" -> api.getOnTheAirSeries(3)
-                        else -> api.getTrendingSeries()
+                    "on_the_air" -> {
+                        val p1 = async { api.getOnTheAirSeries(1).results }
+                        val p2 = async { api.getOnTheAirSeries(2).results }
+                        val p3 = async { api.getOnTheAirSeries(3).results }
+                        val p4 = async { api.getOnTheAirSeries(4).results }
+                        (p1.await() + p2.await() + p3.await() + p4.await())
+                            .distinctBy { it.id }
                     }
+                    else -> api.getTrendingSeries().results.distinctBy { it.id }
                 }
-                val page4 = async {
-                    when (category) {
-                        "trending" -> api.getTrendingSeries()
-                        "top_rated" -> api.getTopRatedSeries(4)
-                        "on_the_air" -> api.getOnTheAirSeries(4)
-                        else -> api.getTrendingSeries()
-                    }
-                }
-                val combined = page1.await().results +
-                        page2.await().results +
-                        page3.await().results +
-                        page4.await().results
-
-                _seeAllSeries.value = UiState.Success(combined)
+                _seeAllSeries.value = UiState.Success(results)
             } catch (e: Exception) {
                 _seeAllSeries.value = UiState.Error(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun loadSeeAllMoviesByGenre(genreId: Int) {
+        viewModelScope.launch {
+            _seeAllMoviesByGenre.value = UiState.Loading
+            try {
+                val p1 = async { api.getMoviesByGenre(genreId, 1).results }
+                val p2 = async { api.getMoviesByGenre(genreId, 2).results }
+                val p3 = async { api.getMoviesByGenre(genreId, 3).results }
+                val p4 = async { api.getMoviesByGenre(genreId, 4).results }
+                val combined = (p1.await() + p2.await() + p3.await() + p4.await())
+                    .distinctBy { it.id }
+                _seeAllMoviesByGenre.value = UiState.Success(combined)
+            } catch (e: Exception) {
+                _seeAllMoviesByGenre.value = UiState.Error(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun loadSeeAllSeriesByGenre(genreId: Int) {
+        viewModelScope.launch {
+            _seeAllSeriesByGenre.value = UiState.Loading
+            try {
+                val p1 = async { api.getSeriesByGenre(genreId, 1).results }
+                val p2 = async { api.getSeriesByGenre(genreId, 2).results }
+                val p3 = async { api.getSeriesByGenre(genreId, 3).results }
+                val p4 = async { api.getSeriesByGenre(genreId, 4).results }
+                val combined = (p1.await() + p2.await() + p3.await() + p4.await())
+                    .distinctBy { it.id }
+                _seeAllSeriesByGenre.value = UiState.Success(combined)
+            } catch (e: Exception) {
+                _seeAllSeriesByGenre.value = UiState.Error(e.message ?: "Error")
             }
         }
     }

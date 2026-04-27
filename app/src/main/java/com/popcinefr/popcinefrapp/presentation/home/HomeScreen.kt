@@ -1,6 +1,7 @@
 package com.popcinefr.popcinefrapp.presentation.home
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,7 +47,9 @@ fun HomeScreen(
     onMovieClick: (Int) -> Unit,
     onSeriesClick: (Int) -> Unit,
     onSeeAllMovies: (String) -> Unit,
-    onSeeAllSeries: (String) -> Unit
+    onSeeAllSeries: (String) -> Unit,
+    onSeeAllMoviesByGenre: (Int, String) -> Unit,
+    onSeeAllSeriesByGenre: (Int, String) -> Unit
 ) {
     val viewModel: HomeViewModel = viewModel()
     val selectedTab by viewModel.selectedTab.collectAsState()
@@ -54,7 +58,10 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("PopCineFR 🎬", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "PopCineFR 🎬",
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
@@ -127,7 +134,7 @@ fun HomeScreen(
                 }
             }
 
-            // --- Content based on selected tab ---
+            // --- Scrollable content ---
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -137,13 +144,15 @@ fun HomeScreen(
                     MoviesContent(
                         viewModel = viewModel,
                         onMovieClick = onMovieClick,
-                        onSeeAllMovies = onSeeAllMovies
+                        onSeeAllMovies = onSeeAllMovies,
+                        onSeeAllMoviesByGenre = onSeeAllMoviesByGenre
                     )
                 } else {
                     SeriesContent(
                         viewModel = viewModel,
                         onSeriesClick = onSeriesClick,
-                        onSeeAllSeries = onSeeAllSeries
+                        onSeeAllSeries = onSeeAllSeries,
+                        onSeeAllSeriesByGenre = onSeeAllSeriesByGenre
                     )
                 }
             }
@@ -156,7 +165,8 @@ fun HomeScreen(
 fun MoviesContent(
     viewModel: HomeViewModel,
     onMovieClick: (Int) -> Unit,
-    onSeeAllMovies: (String) -> Unit
+    onSeeAllMovies: (String) -> Unit,
+    onSeeAllMoviesByGenre: (Int, String) -> Unit
 ) {
     val trendingMovies by viewModel.trendingMovies.collectAsState()
     val topRatedMovies by viewModel.topRatedMovies.collectAsState()
@@ -212,7 +222,8 @@ fun MoviesContent(
         itemTitle = { it.title },
         itemPoster = { it.posterPath },
         itemRating = { it.voteAverage },
-        onItemClick = { onMovieClick(it.id) }
+        onItemClick = { onMovieClick(it.id) },
+        onSeeAllClick = { onSeeAllMoviesByGenre(selectedGenre.id, selectedGenre.name) }
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -223,7 +234,8 @@ fun MoviesContent(
 fun SeriesContent(
     viewModel: HomeViewModel,
     onSeriesClick: (Int) -> Unit,
-    onSeeAllSeries: (String) -> Unit
+    onSeeAllSeries: (String) -> Unit,
+    onSeeAllSeriesByGenre: (Int, String) -> Unit
 ) {
     val trendingSeries by viewModel.trendingSeries.collectAsState()
     val topRatedSeries by viewModel.topRatedSeries.collectAsState()
@@ -279,7 +291,8 @@ fun SeriesContent(
         itemTitle = { it.name },
         itemPoster = { it.posterPath },
         itemRating = { it.voteAverage },
-        onItemClick = { onSeriesClick(it.id) }
+        onItemClick = { onSeriesClick(it.id) },
+        onSeeAllClick = { onSeeAllSeriesByGenre(selectedGenre.id, selectedGenre.name) }
     )
 
     Spacer(modifier = Modifier.height(16.dp))
