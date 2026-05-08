@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.popcinefr.popcinefrapp.data.remote.GenreDto
 import com.popcinefr.popcinefrapp.data.remote.VideoDto
+import com.popcinefr.popcinefrapp.presentation.components.YoutubePlayer
 import com.popcinefr.popcinefrapp.util.toImageUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -203,32 +204,22 @@ fun DetailContent(
 
             // --- Trailer Button ---
             // Only show if we found a YouTube trailer
+// --- Embedded Trailer ---
             if (trailer != null) {
-                Button(
-                    onClick = {
-                        // Build the YouTube URL and open it
-                        val youtubeUrl = "https://www.youtube.com/watch?v=${trailer.key}"
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(youtubeUrl)
-                        )
-                        // This opens YouTube app if installed
-                        // or YouTube in browser if not
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = "Play Trailer"
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Watch Trailer on YouTube")
-                }
+                Text(
+                    text = "Trailer",
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                YoutubePlayer(
+                    youtubeKey = trailer.key,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Spacer(modifier = Modifier.height(32.dp))
         }

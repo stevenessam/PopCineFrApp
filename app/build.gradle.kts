@@ -94,4 +94,6 @@ dependencies {
 
     // DataStore
     implementation(libs.datastore.preferences)
+
+    implementation("androidx.browser:browser:1.8.0")
 }
