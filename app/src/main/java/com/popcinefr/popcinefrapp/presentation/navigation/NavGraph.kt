@@ -7,6 +7,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,6 +31,7 @@ fun NavGraph() {
     val navController = rememberNavController()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             BottomNavigationBar(navController = navController)
         }
@@ -34,7 +40,11 @@ fun NavGraph() {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.padding(paddingValues)
+            // Only keep bottom padding for the bottom navigation bar
+            // Remove top padding that was causing the empty space
+            modifier = Modifier.padding(
+                bottom = paddingValues.calculateBottomPadding()
+            )
         ) {
 
             // Home
