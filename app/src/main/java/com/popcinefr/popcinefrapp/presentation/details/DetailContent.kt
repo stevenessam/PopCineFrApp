@@ -88,14 +88,9 @@ fun DetailContent(
         it.type == "Trailer" && it.site == "YouTube"
     }
 
-    // ScrollState lets us programmatically scroll to any position
     val scrollState = rememberScrollState()
-
-    // coroutineScope is needed to launch the scroll animation
     val coroutineScope = rememberCoroutineScope()
 
-    // These store the Y position of each section on screen
-    // onGloballyPositioned gives us the real pixel position after layout
     var trailerSectionY by remember { mutableIntStateOf(0) }
     var watchSectionY by remember { mutableIntStateOf(0) }
 
@@ -158,7 +153,6 @@ fun DetailContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                // Pass our scrollState so we can control it programmatically
                 .verticalScroll(scrollState)
         ) {
 
@@ -232,12 +226,28 @@ fun DetailContent(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             if (releaseDate != null) {
-                                Text("•", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                                Text(releaseDate.take(4), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = "•",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp
+                                )
+                                Text(
+                                    text = releaseDate.take(4),
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             if (extraInfo != null) {
-                                Text("•", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                                Text(extraInfo, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = "•",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp
+                                )
+                                Text(
+                                    text = extraInfo,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
 
@@ -264,7 +274,6 @@ fun DetailContent(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Watch Now — animates scroll to the Watch section
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -280,7 +289,6 @@ fun DetailContent(
                     Text("▶ Watch Now", fontWeight = FontWeight.Bold)
                 }
 
-                // Trailer — animates scroll to the Trailer section
                 if (trailer != null) {
                     OutlinedButton(
                         onClick = {
@@ -317,7 +325,10 @@ fun DetailContent(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    items(items = cast.take(15), key = { it.id }) { member ->
+                    items(
+                        items = cast.take(15),
+                        key = { it.id }
+                    ) { member ->
                         CastCard(member = member)
                     }
                 }
@@ -325,8 +336,6 @@ fun DetailContent(
             }
 
             // --- Trailer Section ---
-            // onGloballyPositioned captures the Y position of this section
-            // We store it so the button above knows where to scroll to
             if (trailer != null) {
                 Box(
                     modifier = Modifier.onGloballyPositioned { coordinates ->
@@ -345,7 +354,6 @@ fun DetailContent(
             }
 
             // --- Watch Section ---
-            // Same trick — capture Y position for the Watch Now button
             Box(
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     watchSectionY = coordinates.positionInRoot().y.toInt()
@@ -358,12 +366,16 @@ fun DetailContent(
                         else "Stream with episode selector",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(
+                            horizontal = 16.dp,
+                            vertical = 4.dp
+                        )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     VidkingPlayer(
                         tmdbId = tmdbId,
                         isMovie = isMovie,
+                        thumbnailPath = backdropPath,   // ← add this
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
@@ -374,7 +386,6 @@ fun DetailContent(
     }
 }
 
-// --- Section Title ---
 @Composable
 fun SectionTitle(title: String) {
     Row(
@@ -398,7 +409,6 @@ fun SectionTitle(title: String) {
     }
 }
 
-// --- Cast Card ---
 @Composable
 fun CastCard(member: CastMemberDto) {
     Column(
