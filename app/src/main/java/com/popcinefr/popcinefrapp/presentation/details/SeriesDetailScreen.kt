@@ -38,6 +38,8 @@ fun SeriesDetailScreen(
         is UiState.Success -> {
             val series = state.data
             DetailContent(
+                tmdbId = series.id,         // ← ajouter
+                isMovie = false,            // ← ajouter
                 title = series.name,
                 overview = series.overview,
                 posterPath = series.posterPath,

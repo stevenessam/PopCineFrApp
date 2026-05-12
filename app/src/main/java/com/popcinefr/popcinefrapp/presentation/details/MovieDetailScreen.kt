@@ -38,6 +38,8 @@ fun MovieDetailScreen(
         is UiState.Success -> {
             val movie = state.data
             DetailContent(
+                tmdbId = movie.id,          // ← ajouter
+                isMovie = true,             // ← ajouter
                 title = movie.title,
                 overview = movie.overview,
                 posterPath = movie.posterPath,
