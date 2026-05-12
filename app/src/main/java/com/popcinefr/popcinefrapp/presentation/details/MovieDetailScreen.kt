@@ -38,8 +38,8 @@ fun MovieDetailScreen(
         is UiState.Success -> {
             val movie = state.data
             DetailContent(
-                tmdbId = movie.id,          // ← ajouter
-                isMovie = true,             // ← ajouter
+                tmdbId = movie.id,
+                isMovie = true,
                 title = movie.title,
                 overview = movie.overview,
                 posterPath = movie.posterPath,
@@ -49,6 +49,7 @@ fun MovieDetailScreen(
                 extraInfo = movie.runtime?.let { "🕐 $it min" },
                 genres = movie.genres,
                 videos = movie.videos.results,
+                cast = movie.credits.cast,      // ← add this
                 isFavorite = isFavorite,
                 onFavoriteClick = {
                     viewModel.toggleFavorite(

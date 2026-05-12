@@ -38,8 +38,8 @@ fun SeriesDetailScreen(
         is UiState.Success -> {
             val series = state.data
             DetailContent(
-                tmdbId = series.id,         // ← ajouter
-                isMovie = false,            // ← ajouter
+                tmdbId = series.id,
+                isMovie = false,
                 title = series.name,
                 overview = series.overview,
                 posterPath = series.posterPath,
@@ -51,6 +51,7 @@ fun SeriesDetailScreen(
                 },
                 genres = series.genres,
                 videos = series.videos.results,
+                cast = series.credits.cast,     // ← add this
                 isFavorite = isFavorite,
                 onFavoriteClick = {
                     viewModel.toggleFavorite(
