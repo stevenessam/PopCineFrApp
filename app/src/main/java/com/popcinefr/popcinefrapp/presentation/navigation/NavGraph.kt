@@ -8,10 +8,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -40,8 +36,6 @@ fun NavGraph() {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            // Only keep bottom padding for the bottom navigation bar
-            // Remove top padding that was causing the empty space
             modifier = Modifier.padding(
                 bottom = paddingValues.calculateBottomPadding()
             )
@@ -71,6 +65,9 @@ fun NavGraph() {
                         navController.navigate(
                             Screen.SeeAllSeriesByGenre.createRoute(genreId, genreName)
                         )
+                    },
+                    onSeeAllMixed = {
+                        navController.navigate(Screen.SeeAllMixed.route)
                     }
                 )
             }
@@ -131,14 +128,12 @@ fun NavGraph() {
                 val category = backStackEntry.arguments?.getString("category") ?: return@composable
                 val viewModel: HomeViewModel = viewModel()
                 val seeAllState by viewModel.seeAllMovies.collectAsState()
-
                 LaunchedEffect(category) { viewModel.loadSeeAllMovies(category) }
-
                 SeeAllScreen(
                     title = when (category) {
-                        "trending" -> "🔥 Trending Movies"
-                        "top_rated" -> "🏆 Top Rated Movies"
-                        "now_playing" -> "🎬 Now Playing"
+                        "trending" -> "Trending Movies"
+                        "most_watched" -> "Most Watched Movies"
+                        "now_playing" -> "Now Playing"
                         else -> "Movies"
                     },
                     uiState = seeAllState,
@@ -159,14 +154,12 @@ fun NavGraph() {
                 val category = backStackEntry.arguments?.getString("category") ?: return@composable
                 val viewModel: HomeViewModel = viewModel()
                 val seeAllState by viewModel.seeAllSeries.collectAsState()
-
                 LaunchedEffect(category) { viewModel.loadSeeAllSeries(category) }
-
                 SeeAllScreen(
                     title = when (category) {
-                        "trending" -> "🔥 Trending Series"
-                        "top_rated" -> "🏆 Top Rated Series"
-                        "on_the_air" -> "📡 On The Air"
+                        "trending" -> "Trending Series"
+                        "most_watched" -> "Most Watched Series"
+                        "on_the_air" -> "On The Air"
                         else -> "Series"
                     },
                     uiState = seeAllState,
@@ -175,6 +168,28 @@ fun NavGraph() {
                     itemPoster = { it.posterPath },
                     itemRating = { it.voteAverage },
                     onItemClick = { navController.navigate(Screen.SeriesDetail.createRoute(it.id)) },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            // See All Mixed Trending
+            composable(Screen.SeeAllMixed.route) {
+                val viewModel: HomeViewModel = viewModel()
+                val seeAllState by viewModel.seeAllMixed.collectAsState()
+                LaunchedEffect(Unit) { viewModel.loadSeeAllMixed() }
+                SeeAllScreen(
+                    title = "Trending Now",
+                    uiState = seeAllState,
+                    itemKey = { it.id },
+                    itemTitle = { it.title },
+                    itemPoster = { it.posterPath },
+                    itemRating = { it.voteAverage },
+                    onItemClick = { item ->
+                        if (item.mediaType == "movie")
+                            navController.navigate(Screen.MovieDetail.createRoute(item.id))
+                        else
+                            navController.navigate(Screen.SeriesDetail.createRoute(item.id))
+                    },
                     onBackClick = { navController.popBackStack() }
                 )
             }
@@ -191,11 +206,9 @@ fun NavGraph() {
                 val genreName = backStackEntry.arguments?.getString("genreName") ?: return@composable
                 val viewModel: HomeViewModel = viewModel()
                 val seeAllState by viewModel.seeAllMoviesByGenre.collectAsState()
-
                 LaunchedEffect(genreId) { viewModel.loadSeeAllMoviesByGenre(genreId) }
-
                 SeeAllScreen(
-                    title = "🎭 $genreName Movies",
+                    title = "$genreName Movies",
                     uiState = seeAllState,
                     itemKey = { it.id },
                     itemTitle = { it.title },
@@ -218,11 +231,9 @@ fun NavGraph() {
                 val genreName = backStackEntry.arguments?.getString("genreName") ?: return@composable
                 val viewModel: HomeViewModel = viewModel()
                 val seeAllState by viewModel.seeAllSeriesByGenre.collectAsState()
-
                 LaunchedEffect(genreId) { viewModel.loadSeeAllSeriesByGenre(genreId) }
-
                 SeeAllScreen(
-                    title = "🎭 $genreName Series",
+                    title = "$genreName Series",
                     uiState = seeAllState,
                     itemKey = { it.id },
                     itemTitle = { it.name },

@@ -109,4 +109,20 @@ class MovieRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun getPopularMovies(): Result<List<MovieDto>> {
+        return try {
+            Result.success(api.getPopularMovies().results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getPopularSeries(): Result<List<SeriesDto>> {
+        return try {
+            Result.success(api.getPopularSeries().results)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

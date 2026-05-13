@@ -28,6 +28,8 @@ sealed class Screen(val route: String) {
         fun createRoute(category: String) = "see_all_series/$category"
     }
 
+    object SeeAllMixed : Screen("see_all_mixed")
+
     object SeeAllMoviesByGenre : Screen("see_all_movies_genre/{genreId}/{genreName}") {
         fun createRoute(genreId: Int, genreName: String) =
             "see_all_movies_genre/$genreId/$genreName"

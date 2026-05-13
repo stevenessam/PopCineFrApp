@@ -104,5 +104,7 @@ interface TmdbApiService {
         @Query("page") page: Int = 1,
         @Query("language") language: String = "en-US"
     ): SeriesResponseDto
+
+
 }
 

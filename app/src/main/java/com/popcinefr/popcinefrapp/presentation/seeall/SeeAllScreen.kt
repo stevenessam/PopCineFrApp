@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.popcinefr.popcinefrapp.presentation.components.MediaCard
 import com.popcinefr.popcinefrapp.util.UiState
 
@@ -48,12 +49,16 @@ fun <T> SeeAllScreen(
                 title = {
                     Text(
                         text = title,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -64,9 +69,6 @@ fun <T> SeeAllScreen(
     ) { paddingValues ->
 
         when (uiState) {
-
-            // Show spinner — DO NOT render grid yet
-            // This prevents any crash from partially loaded data
             is UiState.Loading -> {
                 Box(
                     modifier = Modifier
@@ -74,12 +76,15 @@ fun <T> SeeAllScreen(
                         .padding(paddingValues),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "Loading...",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp
                         )
                     }
                 }
@@ -99,10 +104,7 @@ fun <T> SeeAllScreen(
                 }
             }
 
-            // Only render grid when ALL data is ready and deduplicated
             is UiState.Success -> {
-                // Extra safety — filter out any remaining duplicate IDs
-                // before passing to the grid
                 val safeItems = uiState.data.distinctBy { itemKey(it) }
 
                 if (safeItems.isEmpty()) {
@@ -123,13 +125,17 @@ fun <T> SeeAllScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        contentPadding = PaddingValues(12.dp),
+                        contentPadding = PaddingValues(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 12.dp,
+                            bottom = 32.dp
+                        ),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(
                             items = safeItems,
-                            // Key is now guaranteed unique — no crash possible
                             key = { itemKey(it) }
                         ) { item ->
                             MediaCard(

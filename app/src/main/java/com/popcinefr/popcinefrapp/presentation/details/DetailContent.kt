@@ -118,31 +118,7 @@ fun DetailContent(
                         }
                     }
                 },
-                actions = {
-                    Box(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        IconButton(onClick = onFavoriteClick) {
-                            Icon(
-                                imageVector = if (isFavorite)
-                                    Icons.Filled.Favorite
-                                else
-                                    Icons.Filled.FavoriteBorder,
-                                contentDescription = "Favorite",
-                                tint = if (isFavorite) Color.Red
-                                else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                },
+                actions = { },  // empty — no heart here anymore
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
                 )
@@ -256,13 +232,34 @@ fun DetailContent(
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                genres.take(3).forEach { genre ->
+                                val maxVisible = 2
+                                val visible = genres.take(maxVisible)
+                                val overflow = genres.size - maxVisible
+
+                                visible.forEach { genre ->
                                     Surface(
                                         shape = RoundedCornerShape(4.dp),
                                         color = MaterialTheme.colorScheme.surfaceVariant
                                     ) {
                                         Text(
                                             text = genre.name,
+                                            fontSize = 10.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(
+                                                horizontal = 8.dp,
+                                                vertical = 3.dp
+                                            )
+                                        )
+                                    }
+                                }
+
+                                if (overflow > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant
+                                    ) {
+                                        Text(
+                                            text = "+$overflow",
                                             fontSize = 10.sp,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.padding(

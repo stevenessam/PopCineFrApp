@@ -1,5 +1,6 @@
 package com.popcinefr.popcinefrapp.presentation.favorites
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,13 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,9 +39,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.popcinefr.popcinefrapp.data.local.entity.FavoriteEntity
 import com.popcinefr.popcinefrapp.presentation.components.MediaCard
-import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
-import com.popcinefr.popcinefrapp.util.toImageUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +68,6 @@ fun FavoritesScreen(
     ) { paddingValues ->
 
         if (favoriteMovies.isEmpty() && favoriteSeries.isEmpty()) {
-            // --- Empty State ---
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -112,84 +108,114 @@ fun FavoritesScreen(
                 }
             }
         } else {
-            Column(
+            // Grid layout — 3 columns
+            // Uses GridItemSpan for section headers that span all columns
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top = 8.dp,
+                    bottom = 32.dp
+                ),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
+                // Movies section header
                 if (favoriteMovies.isNotEmpty()) {
-                    FavoritesSection(
-                        title = "Movies",
+                    item(span = { GridItemSpan(3) }) {
+                        FavoritesSectionHeader(
+                            title = "Movies",
+                            count = favoriteMovies.size
+                        )
+                    }
+
+                    items(
                         items = favoriteMovies,
-                        onItemClick = { onMovieClick(it.id) }
-                    )
+                        key = { "movie_${it.id}" }
+                    ) { item ->
+                        MediaCard(
+                            title = item.title,
+                            posterPath = item.posterPath,
+                            rating = item.voteAverage,
+                            onClick = { onMovieClick(item.id) }
+                        )
+                    }
                 }
 
+                // Series section header
                 if (favoriteSeries.isNotEmpty()) {
-                    FavoritesSection(
-                        title = "Series",
-                        items = favoriteSeries,
-                        onItemClick = { onSeriesClick(it.id) }
-                    )
-                }
+                    item(span = { GridItemSpan(3) }) {
+                        FavoritesSectionHeader(
+                            title = "Series",
+                            count = favoriteSeries.size,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    items(
+                        items = favoriteSeries,
+                        key = { "series_${it.id}" }
+                    ) { item ->
+                        MediaCard(
+                            title = item.title,
+                            posterPath = item.posterPath,
+                            rating = item.voteAverage,
+                            onClick = { onSeriesClick(item.id) }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
+// Section header spanning full grid width
 @Composable
-fun FavoritesSection(
+fun FavoritesSectionHeader(
     title: String,
-    items: List<FavoriteEntity>,
-    onItemClick: (FavoriteEntity) -> Unit
+    count: Int,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-
-        // Section title with accent bar — same as home
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(
-                horizontal = 16.dp,
-                vertical = 10.dp
-            )
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(18.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(
-                items = items,
-                key = { item -> item.id }
-            ) { item ->
-                MediaCard(
-                    title = item.title,
-                    posterPath = item.posterPath,
-                    rating = item.voteAverage,
-                    onClick = { onItemClick(item) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .height(18.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        // Item count badge
+        Box(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(20.dp)
                 )
-            }
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+        ) {
+            Text(
+                text = "$count",
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
+            )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }

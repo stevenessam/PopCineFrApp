@@ -32,16 +32,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.popcinefr.popcinefrapp.data.remote.MediaItem
+import com.popcinefr.popcinefrapp.presentation.components.MediaCard
 import com.popcinefr.popcinefrapp.presentation.components.MediaSection
 import com.popcinefr.popcinefrapp.util.Genre
+import com.popcinefr.popcinefrapp.util.UiState
 import com.popcinefr.popcinefrapp.util.movieGenres
 import com.popcinefr.popcinefrapp.util.seriesGenres
-import com.popcinefr.popcinefrapp.util.toImageUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,12 +52,14 @@ fun HomeScreen(
     onSeeAllMovies: (String) -> Unit,
     onSeeAllSeries: (String) -> Unit,
     onSeeAllMoviesByGenre: (Int, String) -> Unit,
-    onSeeAllSeriesByGenre: (Int, String) -> Unit
+    onSeeAllSeriesByGenre: (Int, String) -> Unit,
+    onSeeAllMixed: () -> Unit
 ) {
     val viewModel: HomeViewModel = viewModel()
     val selectedTab by viewModel.selectedTab.collectAsState()
     val heroMovies by viewModel.heroMovies.collectAsState()
     val heroSeries by viewModel.heroSeries.collectAsState()
+    val mixedTrending by viewModel.mixedTrending.collectAsState()
 
     Scaffold(
         topBar = {
@@ -88,7 +91,7 @@ fun HomeScreen(
                     HeroItem(
                         id = movie.id,
                         title = movie.title,
-                        backdropPath = movie.backdropPath.toImageUrl("w780"),
+                        backdropPath = "https://image.tmdb.org/t/p/w780${movie.backdropPath}",
                         rating = movie.voteAverage,
                         year = movie.releaseDate?.take(4) ?: "",
                         extraInfo = "",
@@ -101,7 +104,7 @@ fun HomeScreen(
                     HeroItem(
                         id = series.id,
                         title = series.name,
-                        backdropPath = series.backdropPath.toImageUrl("w780"),
+                        backdropPath = "https://image.tmdb.org/t/p/w780${series.backdropPath}",
                         rating = series.voteAverage,
                         year = series.firstAirDate?.take(4) ?: "",
                         extraInfo = "",
@@ -120,13 +123,23 @@ fun HomeScreen(
                 onFavoriteClick = { }
             )
 
+            // --- Mixed Trending Section ---
+            MixedTrendingSection(
+                uiState = mixedTrending,
+                onItemClick = { item ->
+                    if (item.mediaType == "movie") onMovieClick(item.id)
+                    else onSeriesClick(item.id)
+                },
+                onSeeAllClick = onSeeAllMixed
+            )
+
             // --- Tab Bar ---
             HomeTabBar(
                 selectedTab = selectedTab,
                 onTabSelected = { viewModel.onTabSelected(it) }
             )
 
-            // --- Content ---
+            // --- Tab Content ---
             if (selectedTab == HomeTab.MOVIES) {
                 MoviesContent(
                     viewModel = viewModel,
@@ -146,7 +159,94 @@ fun HomeScreen(
     }
 }
 
-// --- Clean Tab Bar with underline ---
+// --- Mixed Trending Section ---
+@Composable
+fun MixedTrendingSection(
+    uiState: UiState<List<MediaItem>>,
+    onItemClick: (MediaItem) -> Unit,
+    onSeeAllClick: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(18.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Trending Now",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Text(
+                text = "See all",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clickable { onSeeAllClick() }
+            )
+        }
+
+        when (uiState) {
+            is UiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
+            is UiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = uiState.message,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+            is UiState.Success -> {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = uiState.data,
+                        key = { "${it.mediaType}_${it.id}" }
+                    ) { item ->
+                        MediaCard(
+                            title = item.title,
+                            posterPath = item.posterPath,
+                            rating = item.voteAverage,
+                            onClick = { onItemClick(item) }
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+// --- Tab Bar ---
 @Composable
 fun HomeTabBar(
     selectedTab: HomeTab,
@@ -155,13 +255,11 @@ fun HomeTabBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(0.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
         HomeTab.values().forEach { tab ->
             val isSelected = selectedTab == tab
             val label = if (tab == HomeTab.MOVIES) "Movies" else "Series"
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -179,7 +277,6 @@ fun HomeTabBar(
                         MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                // Underline indicator
                 Box(
                     modifier = Modifier
                         .width(if (isSelected) 32.dp else 0.dp)
@@ -192,7 +289,7 @@ fun HomeTabBar(
     }
 }
 
-// --- Movies Content ---
+// --- Movies Tab ---
 @Composable
 fun MoviesContent(
     viewModel: HomeViewModel,
@@ -201,7 +298,7 @@ fun MoviesContent(
     onSeeAllMoviesByGenre: (Int, String) -> Unit
 ) {
     val trendingMovies by viewModel.trendingMovies.collectAsState()
-    val topRatedMovies by viewModel.topRatedMovies.collectAsState()
+    val mostWatchedMovies by viewModel.mostWatchedMovies.collectAsState()
     val nowPlayingMovies by viewModel.nowPlayingMovies.collectAsState()
     val moviesByGenre by viewModel.moviesByGenre.collectAsState()
     val selectedGenre by viewModel.selectedMovieGenre.collectAsState()
@@ -218,17 +315,6 @@ fun MoviesContent(
     )
 
     MediaSection(
-        title = "Top Rated",
-        uiState = topRatedMovies,
-        itemKey = { it.id },
-        itemTitle = { it.title },
-        itemPoster = { it.posterPath },
-        itemRating = { it.voteAverage },
-        onItemClick = { onMovieClick(it.id) },
-        onSeeAllClick = { onSeeAllMovies("top_rated") }
-    )
-
-    MediaSection(
         title = "Now Playing",
         uiState = nowPlayingMovies,
         itemKey = { it.id },
@@ -239,7 +325,17 @@ fun MoviesContent(
         onSeeAllClick = { onSeeAllMovies("now_playing") }
     )
 
-    // Genre chips + results
+    MediaSection(
+        title = "Most Watched",
+        uiState = mostWatchedMovies,
+        itemKey = { it.id },
+        itemTitle = { it.title },
+        itemPoster = { it.posterPath },
+        itemRating = { it.voteAverage },
+        onItemClick = { onMovieClick(it.id) },
+        onSeeAllClick = { onSeeAllMovies("most_watched") }
+    )
+
     GenreChipsSection(
         genres = movieGenres,
         selectedGenre = selectedGenre,
@@ -260,7 +356,7 @@ fun MoviesContent(
     Spacer(modifier = Modifier.height(16.dp))
 }
 
-// --- Series Content ---
+// --- Series Tab ---
 @Composable
 fun SeriesContent(
     viewModel: HomeViewModel,
@@ -269,7 +365,7 @@ fun SeriesContent(
     onSeeAllSeriesByGenre: (Int, String) -> Unit
 ) {
     val trendingSeries by viewModel.trendingSeries.collectAsState()
-    val topRatedSeries by viewModel.topRatedSeries.collectAsState()
+    val mostWatchedSeries by viewModel.mostWatchedSeries.collectAsState()
     val onTheAirSeries by viewModel.onTheAirSeries.collectAsState()
     val seriesByGenre by viewModel.seriesByGenre.collectAsState()
     val selectedGenre by viewModel.selectedSeriesGenre.collectAsState()
@@ -286,17 +382,6 @@ fun SeriesContent(
     )
 
     MediaSection(
-        title = "Top Rated",
-        uiState = topRatedSeries,
-        itemKey = { it.id },
-        itemTitle = { it.name },
-        itemPoster = { it.posterPath },
-        itemRating = { it.voteAverage },
-        onItemClick = { onSeriesClick(it.id) },
-        onSeeAllClick = { onSeeAllSeries("top_rated") }
-    )
-
-    MediaSection(
         title = "On The Air",
         uiState = onTheAirSeries,
         itemKey = { it.id },
@@ -305,6 +390,17 @@ fun SeriesContent(
         itemRating = { it.voteAverage },
         onItemClick = { onSeriesClick(it.id) },
         onSeeAllClick = { onSeeAllSeries("on_the_air") }
+    )
+
+    MediaSection(
+        title = "Most Watched",
+        uiState = mostWatchedSeries,
+        itemKey = { it.id },
+        itemTitle = { it.name },
+        itemPoster = { it.posterPath },
+        itemRating = { it.voteAverage },
+        onItemClick = { onSeriesClick(it.id) },
+        onSeeAllClick = { onSeeAllSeries("most_watched") }
     )
 
     GenreChipsSection(
@@ -327,25 +423,28 @@ fun SeriesContent(
     Spacer(modifier = Modifier.height(16.dp))
 }
 
-// --- Genre Chips Section ---
+// --- Genre Chips ---
 @Composable
 fun GenreChipsSection(
     genres: List<Genre>,
     selectedGenre: Genre,
     onGenreSelected: (Genre) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Browse by Genre",
                 fontSize = 16.sp,
@@ -354,7 +453,6 @@ fun GenreChipsSection(
             )
         }
 
-        // Horizontal scrollable chips
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),

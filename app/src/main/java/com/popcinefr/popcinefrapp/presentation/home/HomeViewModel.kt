@@ -2,10 +2,12 @@ package com.popcinefr.popcinefrapp.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.popcinefr.popcinefrapp.data.remote.MediaItem
 import com.popcinefr.popcinefrapp.data.remote.MovieDto
 import com.popcinefr.popcinefrapp.data.remote.MovieRepository
 import com.popcinefr.popcinefrapp.data.remote.RetrofitInstance
 import com.popcinefr.popcinefrapp.data.remote.SeriesDto
+import com.popcinefr.popcinefrapp.data.remote.toMediaItem
 import com.popcinefr.popcinefrapp.util.Genre
 import com.popcinefr.popcinefrapp.util.UiState
 import com.popcinefr.popcinefrapp.util.movieGenres
@@ -24,19 +26,23 @@ class HomeViewModel : ViewModel() {
 
     val selectedTab = MutableStateFlow(HomeTab.MOVIES)
 
-    // --- Hero ---
+    // --- Hero (10 random popular items) ---
     private val _heroMovies = MutableStateFlow<List<MovieDto>>(emptyList())
     val heroMovies: StateFlow<List<MovieDto>> = _heroMovies
 
     private val _heroSeries = MutableStateFlow<List<SeriesDto>>(emptyList())
     val heroSeries: StateFlow<List<SeriesDto>> = _heroSeries
 
+    // --- Mixed Trending (movies + series combined) ---
+    private val _mixedTrending = MutableStateFlow<UiState<List<MediaItem>>>(UiState.Loading)
+    val mixedTrending: StateFlow<UiState<List<MediaItem>>> = _mixedTrending
+
     // --- Movies ---
     private val _trendingMovies = MutableStateFlow<UiState<List<MovieDto>>>(UiState.Loading)
     val trendingMovies: StateFlow<UiState<List<MovieDto>>> = _trendingMovies
 
-    private val _topRatedMovies = MutableStateFlow<UiState<List<MovieDto>>>(UiState.Loading)
-    val topRatedMovies: StateFlow<UiState<List<MovieDto>>> = _topRatedMovies
+    private val _mostWatchedMovies = MutableStateFlow<UiState<List<MovieDto>>>(UiState.Loading)
+    val mostWatchedMovies: StateFlow<UiState<List<MovieDto>>> = _mostWatchedMovies
 
     private val _nowPlayingMovies = MutableStateFlow<UiState<List<MovieDto>>>(UiState.Loading)
     val nowPlayingMovies: StateFlow<UiState<List<MovieDto>>> = _nowPlayingMovies
@@ -48,8 +54,8 @@ class HomeViewModel : ViewModel() {
     private val _trendingSeries = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
     val trendingSeries: StateFlow<UiState<List<SeriesDto>>> = _trendingSeries
 
-    private val _topRatedSeries = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
-    val topRatedSeries: StateFlow<UiState<List<SeriesDto>>> = _topRatedSeries
+    private val _mostWatchedSeries = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
+    val mostWatchedSeries: StateFlow<UiState<List<SeriesDto>>> = _mostWatchedSeries
 
     private val _onTheAirSeries = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
     val onTheAirSeries: StateFlow<UiState<List<SeriesDto>>> = _onTheAirSeries
@@ -70,6 +76,9 @@ class HomeViewModel : ViewModel() {
     private val _seeAllSeriesByGenre = MutableStateFlow<UiState<List<SeriesDto>>>(UiState.Loading)
     val seeAllSeriesByGenre: StateFlow<UiState<List<SeriesDto>>> = _seeAllSeriesByGenre
 
+    private val _seeAllMixed = MutableStateFlow<UiState<List<MediaItem>>>(UiState.Loading)
+    val seeAllMixed: StateFlow<UiState<List<MediaItem>>> = _seeAllMixed
+
     // --- Genre selection ---
     val selectedMovieGenre = MutableStateFlow(movieGenres.first())
     val selectedSeriesGenre = MutableStateFlow(seriesGenres.first())
@@ -77,23 +86,46 @@ class HomeViewModel : ViewModel() {
     init {
         loadMovies()
         loadSeries()
+        loadMixedTrending()
     }
 
     fun onTabSelected(tab: HomeTab) {
         selectedTab.value = tab
     }
 
+    private fun loadMixedTrending() {
+        viewModelScope.launch {
+            _mixedTrending.value = UiState.Loading
+            try {
+                val moviesDeferred = async { api.getTrendingMovies().results }
+                val seriesDeferred = async { api.getTrendingSeries().results }
+                val movies = moviesDeferred.await().map { it.toMediaItem() }
+                val series = seriesDeferred.await().map { it.toMediaItem() }
+                // Interleave movies and series for a mixed feel
+                val mixed = mutableListOf<MediaItem>()
+                val maxSize = maxOf(movies.size, series.size)
+                for (i in 0 until maxSize) {
+                    if (i < movies.size) mixed.add(movies[i])
+                    if (i < series.size) mixed.add(series[i])
+                }
+                _mixedTrending.value = UiState.Success(mixed.distinctBy { it.id })
+            } catch (e: Exception) {
+                _mixedTrending.value = UiState.Error(e.message ?: "Error")
+            }
+        }
+    }
+
     private fun loadMovies() {
         viewModelScope.launch {
-            // Load popular movies for hero — shuffled for random feel
+            // Hero — 10 random popular movies with backdrops
             launch {
                 try {
-                    val page1 = async { api.getPopularMovies(1).results }
-                    val page2 = async { api.getPopularMovies(2).results }
-                    val combined = (page1.await() + page2.await())
+                    val p1 = async { api.getPopularMovies(1).results }
+                    val p2 = async { api.getPopularMovies(2).results }
+                    val combined = (p1.await() + p2.await())
                         .filter { it.backdropPath != null }
                         .shuffled()
-                        .take(5)
+                        .take(10)
                     _heroMovies.value = combined
                 } catch (e: Exception) { }
             }
@@ -104,10 +136,10 @@ class HomeViewModel : ViewModel() {
                     .onFailure { _trendingMovies.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
-                _topRatedMovies.value = UiState.Loading
-                repository.getTopRatedMovies()
-                    .onSuccess { _topRatedMovies.value = UiState.Success(it) }
-                    .onFailure { _topRatedMovies.value = UiState.Error(it.message ?: "Error") }
+                _mostWatchedMovies.value = UiState.Loading
+                repository.getPopularMovies()
+                    .onSuccess { _mostWatchedMovies.value = UiState.Success(it) }
+                    .onFailure { _mostWatchedMovies.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
                 _nowPlayingMovies.value = UiState.Loading
@@ -121,15 +153,15 @@ class HomeViewModel : ViewModel() {
 
     private fun loadSeries() {
         viewModelScope.launch {
-            // Load popular series for hero — shuffled for random feel
+            // Hero — 10 random popular series with backdrops
             launch {
                 try {
-                    val page1 = async { api.getPopularSeries(1).results }
-                    val page2 = async { api.getPopularSeries(2).results }
-                    val combined = (page1.await() + page2.await())
+                    val p1 = async { api.getPopularSeries(1).results }
+                    val p2 = async { api.getPopularSeries(2).results }
+                    val combined = (p1.await() + p2.await())
                         .filter { it.backdropPath != null }
                         .shuffled()
-                        .take(5)
+                        .take(10)
                     _heroSeries.value = combined
                 } catch (e: Exception) { }
             }
@@ -140,10 +172,10 @@ class HomeViewModel : ViewModel() {
                     .onFailure { _trendingSeries.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
-                _topRatedSeries.value = UiState.Loading
-                repository.getTopRatedSeries()
-                    .onSuccess { _topRatedSeries.value = UiState.Success(it) }
-                    .onFailure { _topRatedSeries.value = UiState.Error(it.message ?: "Error") }
+                _mostWatchedSeries.value = UiState.Loading
+                repository.getPopularSeries()
+                    .onSuccess { _mostWatchedSeries.value = UiState.Success(it) }
+                    .onFailure { _mostWatchedSeries.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
                 _onTheAirSeries.value = UiState.Loading
@@ -181,11 +213,11 @@ class HomeViewModel : ViewModel() {
             try {
                 val results = when (category) {
                     "trending" -> api.getTrendingMovies().results.distinctBy { it.id }
-                    "top_rated" -> {
-                        val p1 = async { api.getTopRatedMovies(1).results }
-                        val p2 = async { api.getTopRatedMovies(2).results }
-                        val p3 = async { api.getTopRatedMovies(3).results }
-                        val p4 = async { api.getTopRatedMovies(4).results }
+                    "most_watched" -> {
+                        val p1 = async { api.getPopularMovies(1).results }
+                        val p2 = async { api.getPopularMovies(2).results }
+                        val p3 = async { api.getPopularMovies(3).results }
+                        val p4 = async { api.getPopularMovies(4).results }
                         (p1.await() + p2.await() + p3.await() + p4.await()).distinctBy { it.id }
                     }
                     "now_playing" -> {
@@ -210,11 +242,11 @@ class HomeViewModel : ViewModel() {
             try {
                 val results = when (category) {
                     "trending" -> api.getTrendingSeries().results.distinctBy { it.id }
-                    "top_rated" -> {
-                        val p1 = async { api.getTopRatedSeries(1).results }
-                        val p2 = async { api.getTopRatedSeries(2).results }
-                        val p3 = async { api.getTopRatedSeries(3).results }
-                        val p4 = async { api.getTopRatedSeries(4).results }
+                    "most_watched" -> {
+                        val p1 = async { api.getPopularSeries(1).results }
+                        val p2 = async { api.getPopularSeries(2).results }
+                        val p3 = async { api.getPopularSeries(3).results }
+                        val p4 = async { api.getPopularSeries(4).results }
                         (p1.await() + p2.await() + p3.await() + p4.await()).distinctBy { it.id }
                     }
                     "on_the_air" -> {
@@ -229,6 +261,33 @@ class HomeViewModel : ViewModel() {
                 _seeAllSeries.value = UiState.Success(results)
             } catch (e: Exception) {
                 _seeAllSeries.value = UiState.Error(e.message ?: "Error")
+            }
+        }
+    }
+
+    fun loadSeeAllMixed() {
+        viewModelScope.launch {
+            _seeAllMixed.value = UiState.Loading
+            try {
+                val mp1 = async { api.getTrendingMovies().results }
+                val sp1 = async { api.getTrendingSeries().results }
+                val mp2 = async { api.getPopularMovies(1).results }
+                val sp2 = async { api.getPopularSeries(1).results }
+                val movies = (mp1.await() + mp2.await())
+                    .distinctBy { it.id }
+                    .map { it.toMediaItem() }
+                val series = (sp1.await() + sp2.await())
+                    .distinctBy { it.id }
+                    .map { it.toMediaItem() }
+                val mixed = mutableListOf<MediaItem>()
+                val maxSize = maxOf(movies.size, series.size)
+                for (i in 0 until maxSize) {
+                    if (i < movies.size) mixed.add(movies[i])
+                    if (i < series.size) mixed.add(series[i])
+                }
+                _seeAllMixed.value = UiState.Success(mixed.distinctBy { it.id })
+            } catch (e: Exception) {
+                _seeAllMixed.value = UiState.Error(e.message ?: "Error")
             }
         }
     }
@@ -270,5 +329,6 @@ class HomeViewModel : ViewModel() {
     fun refresh() {
         loadMovies()
         loadSeries()
+        loadMixedTrending()
     }
 }

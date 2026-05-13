@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -20,8 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -53,7 +51,6 @@ fun HeroBanner(
 
     val pagerState = rememberPagerState(pageCount = { items.size })
 
-    // Auto-rotate every 5 seconds
     LaunchedEffect(Unit) {
         while (true) {
             delay(5000)
@@ -68,7 +65,7 @@ fun HeroBanner(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(260.dp)
+            .height(280.dp)
     ) {
         HorizontalPager(
             state = pagerState,
@@ -82,7 +79,7 @@ fun HeroBanner(
             )
         }
 
-        // Dot indicators at the bottom right
+        // Dot indicators
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -94,15 +91,15 @@ fun HeroBanner(
                 Box(
                     modifier = Modifier
                         .size(
-                            if (pagerState.currentPage == index) 20.dp else 6.dp,
-                            6.dp
+                            width = if (pagerState.currentPage == index) 20.dp else 6.dp,
+                            height = 6.dp
                         )
-                        .clip(RoundedCornerShape(3.dp))
                         .background(
-                            if (pagerState.currentPage == index)
+                            color = if (pagerState.currentPage == index)
                                 Color.White
                             else
-                                Color.White.copy(alpha = 0.4f)
+                                Color.White.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(3.dp)
                         )
                 )
             }
@@ -118,7 +115,6 @@ fun HeroBannerItem(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // Backdrop image
         AsyncImage(
             model = item.backdropPath,
             contentDescription = item.title,
@@ -126,46 +122,67 @@ fun HeroBannerItem(
             modifier = Modifier.fillMaxSize()
         )
 
-        // Gradient overlay — dark at bottom for text readability
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.2f),
-                            Color.Black.copy(alpha = 0.75f)
+                            Color.Black.copy(alpha = 0.15f),
+                            Color.Black.copy(alpha = 0.8f)
                         )
                     )
                 )
         )
 
-        // Content at the bottom
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
         ) {
-            // Genre tags
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                item.genres.take(2).forEach { genre ->
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = Color.White.copy(alpha = 0.2f)
-                    ) {
-                        Text(
-                            text = genre,
-                            fontSize = 10.sp,
-                            color = Color.White,
-                            modifier = Modifier.padding(
-                                horizontal = 8.dp,
-                                vertical = 3.dp
+            // Genre tags with +N overflow
+            if (item.genres.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    val maxVisible = 2
+                    val visible = item.genres.take(maxVisible)
+                    val overflow = item.genres.size - maxVisible
+
+                    visible.forEach { genre ->
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = Color.White.copy(alpha = 0.2f)
+                        ) {
+                            Text(
+                                text = genre,
+                                fontSize = 10.sp,
+                                color = Color.White,
+                                modifier = Modifier.padding(
+                                    horizontal = 8.dp,
+                                    vertical = 3.dp
+                                )
                             )
-                        )
+                        }
+                    }
+
+                    if (overflow > 0) {
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = Color.White.copy(alpha = 0.2f)
+                        ) {
+                            Text(
+                                text = "+$overflow",
+                                fontSize = 10.sp,
+                                color = Color.White,
+                                modifier = Modifier.padding(
+                                    horizontal = 8.dp,
+                                    vertical = 3.dp
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -173,7 +190,7 @@ fun HeroBannerItem(
             // Title
             Text(
                 text = item.title,
-                fontSize = 22.sp,
+                fontSize = 21.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
                 maxLines = 2,
@@ -181,22 +198,17 @@ fun HeroBannerItem(
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // Rating + year + extra info
+            // Rating + year
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = 14.dp)
             ) {
                 Text(
-                    text = "${"%.1f".format(item.rating)}",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFF5C518) // IMDb yellow
-                )
-                Text(
-                    text = "/10",
-                    fontSize = 11.sp,
-                    color = Color.White.copy(alpha = 0.6f)
+                    text = "${"%.1f".format(item.rating)}/10",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFF5C518)
                 )
                 if (item.year.isNotEmpty()) {
                     Text(
@@ -210,67 +222,67 @@ fun HeroBannerItem(
                         color = Color.White.copy(alpha = 0.8f)
                     )
                 }
-                if (item.extraInfo.isNotEmpty()) {
-                    Text(
-                        text = "•",
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = item.extraInfo,
-                        fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
-                }
             }
 
-            // Buttons
+            // Buttons — fixed sizes
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Button(
+                // Watch Now — fixed height, no weight stretching
+                Surface(
                     onClick = onWatchClick,
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    modifier = Modifier.height(38.dp)
+                    color = Color.White,
+                    modifier = Modifier.height(36.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Watch now",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 14.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Watch now",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black
+                        )
+                    }
                 }
 
-                IconButton(
-                    onClick = onFavoriteClick,
+                // Favorite
+                Box(
                     modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White.copy(alpha = 0.2f))
+                        .size(36.dp)
+                        .background(
+                            color = Color.White.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
-                        contentDescription = "Add to favorites",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    IconButton(
+                        onClick = onFavoriteClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.FavoriteBorder,
+                            contentDescription = "Add to favorites",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-// Simple data class for the hero banner items
 data class HeroItem(
     val id: Int,
     val title: String,
@@ -279,5 +291,5 @@ data class HeroItem(
     val year: String,
     val extraInfo: String,
     val genres: List<String>,
-    val mediaType: String  // "movie" or "series"
+    val mediaType: String
 )
