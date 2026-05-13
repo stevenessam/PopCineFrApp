@@ -85,16 +85,22 @@ class HomeViewModel : ViewModel() {
 
     private fun loadMovies() {
         viewModelScope.launch {
+            // Load popular movies for hero — shuffled for random feel
+            launch {
+                try {
+                    val page1 = async { api.getPopularMovies(1).results }
+                    val page2 = async { api.getPopularMovies(2).results }
+                    val combined = (page1.await() + page2.await())
+                        .filter { it.backdropPath != null }
+                        .shuffled()
+                        .take(5)
+                    _heroMovies.value = combined
+                } catch (e: Exception) { }
+            }
             launch {
                 _trendingMovies.value = UiState.Loading
                 repository.getTrendingMovies()
-                    .onSuccess { movies ->
-                        _trendingMovies.value = UiState.Success(movies)
-                        // Use first 5 trending movies for the hero banner
-                        if (_heroMovies.value.isEmpty()) {
-                            _heroMovies.value = movies.take(5)
-                        }
-                    }
+                    .onSuccess { _trendingMovies.value = UiState.Success(it) }
                     .onFailure { _trendingMovies.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
@@ -115,15 +121,22 @@ class HomeViewModel : ViewModel() {
 
     private fun loadSeries() {
         viewModelScope.launch {
+            // Load popular series for hero — shuffled for random feel
+            launch {
+                try {
+                    val page1 = async { api.getPopularSeries(1).results }
+                    val page2 = async { api.getPopularSeries(2).results }
+                    val combined = (page1.await() + page2.await())
+                        .filter { it.backdropPath != null }
+                        .shuffled()
+                        .take(5)
+                    _heroSeries.value = combined
+                } catch (e: Exception) { }
+            }
             launch {
                 _trendingSeries.value = UiState.Loading
                 repository.getTrendingSeries()
-                    .onSuccess { series ->
-                        _trendingSeries.value = UiState.Success(series)
-                        if (_heroSeries.value.isEmpty()) {
-                            _heroSeries.value = series.take(5)
-                        }
-                    }
+                    .onSuccess { _trendingSeries.value = UiState.Success(it) }
                     .onFailure { _trendingSeries.value = UiState.Error(it.message ?: "Error") }
             }
             launch {

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,8 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -90,7 +90,6 @@ fun DetailContent(
 
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-
     var trailerSectionY by remember { mutableIntStateOf(0) }
     var watchSectionY by remember { mutableIntStateOf(0) }
 
@@ -102,10 +101,10 @@ fun DetailContent(
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
-                            .size(38.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -113,7 +112,8 @@ fun DetailContent(
                             Icon(
                                 Icons.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = MaterialTheme.colorScheme.onSurface
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -122,10 +122,10 @@ fun DetailContent(
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
-                            .size(38.dp)
+                            .size(36.dp)
                             .clip(CircleShape)
                             .background(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -137,7 +137,8 @@ fun DetailContent(
                                     Icons.Filled.FavoriteBorder,
                                 contentDescription = "Favorite",
                                 tint = if (isFavorite) Color.Red
-                                else MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -156,11 +157,11 @@ fun DetailContent(
                 .verticalScroll(scrollState)
         ) {
 
-            // --- Hero Section ---
+            // --- Hero ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(320.dp)
+                    .height(300.dp)
             ) {
                 AsyncImage(
                     model = backdropPath.toImageUrl("w780"),
@@ -176,10 +177,10 @@ fun DetailContent(
                             Brush.verticalGradient(
                                 colors = listOf(
                                     Color.Transparent,
-                                    Color.Transparent,
-                                    MaterialTheme.colorScheme.background.copy(alpha = 0.7f),
+                                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
                                     MaterialTheme.colorScheme.background
-                                )
+                                ),
+                                startY = 100f
                             )
                         )
                 )
@@ -188,8 +189,8 @@ fun DetailContent(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalAlignment = Alignment.Bottom
                 ) {
                     AsyncImage(
@@ -197,9 +198,9 @@ fun DetailContent(
                         contentDescription = title,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .width(90.dp)
-                            .height(135.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .width(85.dp)
+                            .height(125.dp)
+                            .clip(RoundedCornerShape(10.dp))
                     )
 
                     Column(
@@ -208,7 +209,7 @@ fun DetailContent(
                     ) {
                         Text(
                             text = title,
-                            fontSize = 20.sp,
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground,
                             maxLines = 2,
@@ -220,16 +221,16 @@ fun DetailContent(
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = "⭐ ${"%.1f".format(voteAverage)}",
-                                fontSize = 13.sp,
+                                text = "${"%.1f".format(voteAverage)}/10",
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            if (releaseDate != null) {
+                            if (!releaseDate.isNullOrEmpty()) {
                                 Text(
                                     text = "•",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 12.sp
+                                    fontSize = 11.sp
                                 )
                                 Text(
                                     text = releaseDate.take(4),
@@ -237,11 +238,11 @@ fun DetailContent(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            if (extraInfo != null) {
+                            if (!extraInfo.isNullOrEmpty()) {
                                 Text(
                                     text = "•",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 12.sp
+                                    fontSize = 11.sp
                                 )
                                 Text(
                                     text = extraInfo,
@@ -251,16 +252,26 @@ fun DetailContent(
                             }
                         }
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            genres.take(3).forEach { genre ->
-                                SuggestionChip(
-                                    onClick = {},
-                                    label = { Text(genre.name, fontSize = 10.sp) },
-                                    shape = RoundedCornerShape(50),
-                                    colors = SuggestionChipDefaults.suggestionChipColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                    )
-                                )
+                        if (genres.isNotEmpty()) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                genres.take(3).forEach { genre ->
+                                    Surface(
+                                        shape = RoundedCornerShape(4.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant
+                                    ) {
+                                        Text(
+                                            text = genre.name,
+                                            fontSize = 10.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(
+                                                horizontal = 8.dp,
+                                                vertical = 3.dp
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -280,13 +291,25 @@ fun DetailContent(
                             scrollState.animateScrollTo(watchSectionY)
                         }
                     },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("▶ Watch Now", fontWeight = FontWeight.Bold)
+                    Icon(
+                        Icons.Filled.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Watch",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
                 }
 
                 if (trailer != null) {
@@ -296,34 +319,62 @@ fun DetailContent(
                                 scrollState.animateScrollTo(trailerSectionY)
                             }
                         },
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("🎬 Trailer", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "Trailer",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            imageVector = if (isFavorite)
+                                Icons.Filled.Favorite
+                            else
+                                Icons.Filled.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = if (isFavorite) Color.Red
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             // --- Overview ---
-            SectionTitle(title = "Overview")
+            DetailSectionTitle(title = "Overview")
             Text(
                 text = overview,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 24.dp
+                ),
                 lineHeight = 22.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
             // --- Cast ---
             if (cast.isNotEmpty()) {
-                SectionTitle(title = "Cast")
+                DetailSectionTitle(title = "Cast")
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.padding(bottom = 24.dp)
                 ) {
                     items(
                         items = cast.take(15),
@@ -332,10 +383,9 @@ fun DetailContent(
                         CastCard(member = member)
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            // --- Trailer Section ---
+            // --- Trailer ---
             if (trailer != null) {
                 Box(
                     modifier = Modifier.onGloballyPositioned { coordinates ->
@@ -343,40 +393,36 @@ fun DetailContent(
                     }
                 ) {
                     Column {
-                        SectionTitle(title = "Trailer")
+                        DetailSectionTitle(title = "Trailer")
                         YoutubePlayer(
                             youtubeKey = trailer.key,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                            modifier = Modifier.padding(
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = 24.dp
+                            )
                         )
-                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }
 
-            // --- Watch Section ---
+            // --- Watch ---
             Box(
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     watchSectionY = coordinates.positionInRoot().y.toInt()
                 }
             ) {
                 Column {
-                    SectionTitle(title = "Watch")
-                    Text(
-                        text = if (isMovie) "Stream the full movie"
-                        else "Stream with episode selector",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(
-                            horizontal = 16.dp,
-                            vertical = 4.dp
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    DetailSectionTitle(title = "Watch")
                     VidkingPlayer(
                         tmdbId = tmdbId,
                         isMovie = isMovie,
-                        thumbnailPath = backdropPath,   // ← add this
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        thumbnailPath = backdropPath,
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            bottom = 16.dp
+                        )
                     )
                 }
             }
@@ -386,11 +432,17 @@ fun DetailContent(
     }
 }
 
+// --- Section Title with accent bar ---
 @Composable
-fun SectionTitle(title: String) {
+fun DetailSectionTitle(title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = Modifier.padding(
+            start = 16.dp,
+            end = 16.dp,
+            top = 4.dp,
+            bottom = 12.dp
+        )
     ) {
         Box(
             modifier = Modifier
@@ -409,15 +461,16 @@ fun SectionTitle(title: String) {
     }
 }
 
+// --- Cast Card ---
 @Composable
 fun CastCard(member: CastMemberDto) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(70.dp)
+        modifier = Modifier.width(64.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(60.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
@@ -434,7 +487,7 @@ fun CastCard(member: CastMemberDto) {
                     imageVector = Icons.Filled.Person,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
@@ -443,23 +496,23 @@ fun CastCard(member: CastMemberDto) {
 
         Text(
             text = member.name,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground,
-            lineHeight = 14.sp
+            lineHeight = 13.sp
         )
 
         Text(
             text = member.character,
-            fontSize = 10.sp,
+            fontSize = 9.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            lineHeight = 13.sp
+            lineHeight = 12.sp
         )
     }
 }

@@ -1,17 +1,39 @@
 package com.popcinefr.popcinefrapp.presentation.search
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.popcinefr.popcinefrapp.presentation.components.MediaSection
 
@@ -22,8 +44,6 @@ fun SearchScreen(
     onSeriesClick: (Int) -> Unit
 ) {
     val viewModel: SearchViewModel = viewModel()
-
-    // collectAsState watches the StateFlow and recomposes when it changes
     val query by viewModel.searchQuery.collectAsState()
     val moviesState by viewModel.moviesState.collectAsState()
     val seriesState by viewModel.seriesState.collectAsState()
@@ -33,10 +53,14 @@ fun SearchScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Search 🔍",
-                        fontWeight = FontWeight.Bold
+                        text = "Search",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { paddingValues ->
@@ -47,64 +71,100 @@ fun SearchScreen(
                 .padding(paddingValues)
         ) {
 
-            // --- Search Bar ---
+            // --- Search Field ---
             OutlinedTextField(
                 value = query,
                 onValueChange = { viewModel.onSearchQueryChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search movies or series...") },
-                leadingIcon = {
-                    Icon(Icons.Filled.Search, contentDescription = "Search")
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                placeholder = {
+                    Text(
+                        text = "Movies, series, actors...",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp
+                    )
                 },
-                // Show a clear button only when there is text
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                },
                 trailingIcon = {
                     if (query.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                            Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                        IconButton(
+                            onClick = { viewModel.onSearchQueryChange("") }
+                        ) {
+                            Icon(
+                                Icons.Filled.Clear,
+                                contentDescription = "Clear",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
                 },
                 singleLine = true,
-                shape = MaterialTheme.shapes.large
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
             )
 
-            // --- Results or Empty State ---
             if (query.length < 2) {
-                // Show a hint when the user hasn't typed enough yet
+                // --- Empty State ---
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = RoundedCornerShape(20.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Search,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
                         Text(
-                            text = "🎬",
-                            style = MaterialTheme.typography.displayMedium
+                            text = "Find your next watch",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Search for your favorite",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "movies and series",
-                            style = MaterialTheme.typography.bodyLarge,
+                            text = "Search for movies or series",
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             } else {
-                // Show results in scrollable column
+                // --- Results ---
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    // Movies results section
                     MediaSection(
-                        title = "🎬 Movies",
+                        title = "Movies",
                         uiState = moviesState,
                         itemKey = { it.id },
                         itemTitle = { it.title },
@@ -113,9 +173,8 @@ fun SearchScreen(
                         onItemClick = { onMovieClick(it.id) }
                     )
 
-                    // Series results section
                     MediaSection(
-                        title = "📺 Series",
+                        title = "Series",
                         uiState = seriesState,
                         itemKey = { it.id },
                         itemTitle = { it.name },
