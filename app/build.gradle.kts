@@ -96,4 +96,5 @@ dependencies {
     implementation(libs.datastore.preferences)
 
     implementation("androidx.browser:browser:1.8.0")
+    implementation("androidx.compose.foundation:foundation:1.7.6")
 }

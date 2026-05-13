@@ -24,6 +24,13 @@ class HomeViewModel : ViewModel() {
 
     val selectedTab = MutableStateFlow(HomeTab.MOVIES)
 
+    // --- Hero ---
+    private val _heroMovies = MutableStateFlow<List<MovieDto>>(emptyList())
+    val heroMovies: StateFlow<List<MovieDto>> = _heroMovies
+
+    private val _heroSeries = MutableStateFlow<List<SeriesDto>>(emptyList())
+    val heroSeries: StateFlow<List<SeriesDto>> = _heroSeries
+
     // --- Movies ---
     private val _trendingMovies = MutableStateFlow<UiState<List<MovieDto>>>(UiState.Loading)
     val trendingMovies: StateFlow<UiState<List<MovieDto>>> = _trendingMovies
@@ -81,7 +88,13 @@ class HomeViewModel : ViewModel() {
             launch {
                 _trendingMovies.value = UiState.Loading
                 repository.getTrendingMovies()
-                    .onSuccess { _trendingMovies.value = UiState.Success(it) }
+                    .onSuccess { movies ->
+                        _trendingMovies.value = UiState.Success(movies)
+                        // Use first 5 trending movies for the hero banner
+                        if (_heroMovies.value.isEmpty()) {
+                            _heroMovies.value = movies.take(5)
+                        }
+                    }
                     .onFailure { _trendingMovies.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
@@ -105,7 +118,12 @@ class HomeViewModel : ViewModel() {
             launch {
                 _trendingSeries.value = UiState.Loading
                 repository.getTrendingSeries()
-                    .onSuccess { _trendingSeries.value = UiState.Success(it) }
+                    .onSuccess { series ->
+                        _trendingSeries.value = UiState.Success(series)
+                        if (_heroSeries.value.isEmpty()) {
+                            _heroSeries.value = series.take(5)
+                        }
+                    }
                     .onFailure { _trendingSeries.value = UiState.Error(it.message ?: "Error") }
             }
             launch {
@@ -149,31 +167,23 @@ class HomeViewModel : ViewModel() {
             _seeAllMovies.value = UiState.Loading
             try {
                 val results = when (category) {
-                    "trending" -> {
-                        // Trending only has 1 page — load it once
-                        api.getTrendingMovies().results
-                            .distinctBy { it.id }
-                    }
+                    "trending" -> api.getTrendingMovies().results.distinctBy { it.id }
                     "top_rated" -> {
-                        // Wait for ALL pages to finish before emitting Success
                         val p1 = async { api.getTopRatedMovies(1).results }
                         val p2 = async { api.getTopRatedMovies(2).results }
                         val p3 = async { api.getTopRatedMovies(3).results }
                         val p4 = async { api.getTopRatedMovies(4).results }
-                        (p1.await() + p2.await() + p3.await() + p4.await())
-                            .distinctBy { it.id }
+                        (p1.await() + p2.await() + p3.await() + p4.await()).distinctBy { it.id }
                     }
                     "now_playing" -> {
                         val p1 = async { api.getNowPlayingMovies(1).results }
                         val p2 = async { api.getNowPlayingMovies(2).results }
                         val p3 = async { api.getNowPlayingMovies(3).results }
                         val p4 = async { api.getNowPlayingMovies(4).results }
-                        (p1.await() + p2.await() + p3.await() + p4.await())
-                            .distinctBy { it.id }
+                        (p1.await() + p2.await() + p3.await() + p4.await()).distinctBy { it.id }
                     }
                     else -> api.getTrendingMovies().results.distinctBy { it.id }
                 }
-                // Only set Success AFTER all pages are combined and deduplicated
                 _seeAllMovies.value = UiState.Success(results)
             } catch (e: Exception) {
                 _seeAllMovies.value = UiState.Error(e.message ?: "Error")
@@ -186,25 +196,20 @@ class HomeViewModel : ViewModel() {
             _seeAllSeries.value = UiState.Loading
             try {
                 val results = when (category) {
-                    "trending" -> {
-                        api.getTrendingSeries().results
-                            .distinctBy { it.id }
-                    }
+                    "trending" -> api.getTrendingSeries().results.distinctBy { it.id }
                     "top_rated" -> {
                         val p1 = async { api.getTopRatedSeries(1).results }
                         val p2 = async { api.getTopRatedSeries(2).results }
                         val p3 = async { api.getTopRatedSeries(3).results }
                         val p4 = async { api.getTopRatedSeries(4).results }
-                        (p1.await() + p2.await() + p3.await() + p4.await())
-                            .distinctBy { it.id }
+                        (p1.await() + p2.await() + p3.await() + p4.await()).distinctBy { it.id }
                     }
                     "on_the_air" -> {
                         val p1 = async { api.getOnTheAirSeries(1).results }
                         val p2 = async { api.getOnTheAirSeries(2).results }
                         val p3 = async { api.getOnTheAirSeries(3).results }
                         val p4 = async { api.getOnTheAirSeries(4).results }
-                        (p1.await() + p2.await() + p3.await() + p4.await())
-                            .distinctBy { it.id }
+                        (p1.await() + p2.await() + p3.await() + p4.await()).distinctBy { it.id }
                     }
                     else -> api.getTrendingSeries().results.distinctBy { it.id }
                 }
