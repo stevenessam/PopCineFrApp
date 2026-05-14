@@ -52,15 +52,6 @@ fun <T> MediaSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Vertical accent bar
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .height(18.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
                     fontSize = 16.sp,
@@ -68,7 +59,6 @@ fun <T> MediaSection(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-
             if (onSeeAllClick != null) {
                 TextButton(
                     onClick = onSeeAllClick,

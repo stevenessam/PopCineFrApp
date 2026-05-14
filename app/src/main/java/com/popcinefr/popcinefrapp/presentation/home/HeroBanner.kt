@@ -13,17 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,7 +39,6 @@ import kotlinx.coroutines.delay
 fun HeroBanner(
     items: List<HeroItem>,
     onItemClick: (Int) -> Unit,
-    onFavoriteClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (items.isEmpty()) return
@@ -74,8 +68,7 @@ fun HeroBanner(
             val item = items[page]
             HeroBannerItem(
                 item = item,
-                onWatchClick = { onItemClick(item.id) },
-                onFavoriteClick = { onFavoriteClick(item.id) }
+                onWatchClick = { onItemClick(item.id) }
             )
         }
 
@@ -110,8 +103,7 @@ fun HeroBanner(
 @Composable
 fun HeroBannerItem(
     item: HeroItem,
-    onWatchClick: () -> Unit,
-    onFavoriteClick: () -> Unit
+    onWatchClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -129,7 +121,7 @@ fun HeroBannerItem(
                     Brush.verticalGradient(
                         colors = listOf(
                             Color.Black.copy(alpha = 0.15f),
-                            Color.Black.copy(alpha = 0.8f)
+                            Color.Black.copy(alpha = 0.85f)
                         )
                     )
                 )
@@ -141,7 +133,6 @@ fun HeroBannerItem(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
         ) {
-            // Genre tags with +N overflow
             if (item.genres.isNotEmpty()) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -187,7 +178,6 @@ fun HeroBannerItem(
                 }
             }
 
-            // Title
             Text(
                 text = item.title,
                 fontSize = 21.sp,
@@ -198,7 +188,6 @@ fun HeroBannerItem(
                 modifier = Modifier.padding(bottom = 6.dp)
             )
 
-            // Rating + year
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -224,59 +213,30 @@ fun HeroBannerItem(
                 }
             }
 
-            // Buttons — fixed sizes
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            // Watch Now button only — no favorite button
+            Surface(
+                onClick = onWatchClick,
+                shape = RoundedCornerShape(8.dp),
+                color = Color.White,
+                modifier = Modifier.height(36.dp)
             ) {
-                // Watch Now — fixed height, no weight stretching
-                Surface(
-                    onClick = onWatchClick,
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color.White,
-                    modifier = Modifier.height(36.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 14.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = null,
-                            tint = Color.Black,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Watch now",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.Black
-                        )
-                    }
-                }
-
-                // Favorite
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            color = Color.White.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    IconButton(
-                        onClick = onFavoriteClick,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.FavoriteBorder,
-                            contentDescription = "Add to favorites",
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Watch now",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Black
+                    )
                 }
             }
         }
