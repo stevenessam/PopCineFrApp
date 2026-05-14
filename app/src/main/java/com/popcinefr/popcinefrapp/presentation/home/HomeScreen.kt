@@ -110,43 +110,6 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
 
-            // ── Hero Banner ──────────────────────────────────────────────
-            val heroItems = if (selectedTab == HomeTab.MOVIES) {
-                heroMovies.map { movie ->
-                    HeroItem(
-                        id = movie.id,
-                        title = movie.title,
-                        backdropPath = "https://image.tmdb.org/t/p/w780${movie.backdropPath}",
-                        rating = movie.voteAverage,
-                        year = movie.releaseDate?.take(4) ?: "",
-                        extraInfo = "",
-                        genres = emptyList(),
-                        mediaType = "movie"
-                    )
-                }
-            } else {
-                heroSeries.map { series ->
-                    HeroItem(
-                        id = series.id,
-                        title = series.name,
-                        backdropPath = "https://image.tmdb.org/t/p/w780${series.backdropPath}",
-                        rating = series.voteAverage,
-                        year = series.firstAirDate?.take(4) ?: "",
-                        extraInfo = "",
-                        genres = emptyList(),
-                        mediaType = "series"
-                    )
-                }
-            }
-
-            HeroBanner(
-                items = heroItems,
-                onItemClick = { id ->
-                    if (selectedTab == HomeTab.MOVIES) onMovieClick(id)
-                    else onSeriesClick(id)
-                }
-            )
-
             // ── Spotlight: Top 3 trending as big numbered cards ──────────
             SpotlightSection(
                 uiState = mixedTrending,
@@ -195,7 +158,6 @@ fun SpotlightSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp)
     ) {
         Row(
             modifier = Modifier
@@ -358,7 +320,7 @@ fun SpotlightCard(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 18.sp
             )
