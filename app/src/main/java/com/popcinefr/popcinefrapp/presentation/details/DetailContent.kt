@@ -1,6 +1,8 @@
 package com.popcinefr.popcinefrapp.presentation.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,9 +22,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Videocam
@@ -49,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -95,6 +100,7 @@ fun DetailContent(
     var watchSectionY by remember { mutableIntStateOf(0) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { },
@@ -105,15 +111,20 @@ fun DetailContent(
                             .size(36.dp)
                             .clip(CircleShape)
                             .background(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                                shape = CircleShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         IconButton(onClick = onBackClick) {
                             Icon(
-                                Icons.Filled.ArrowBack,
+                                Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = MaterialTheme.colorScheme.onSurface,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -131,6 +142,15 @@ fun DetailContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                )
                 .verticalScroll(scrollState)
         ) {
 
@@ -138,7 +158,14 @@ fun DetailContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .height(330.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .clip(RoundedCornerShape(26.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(26.dp)
+                    )
             ) {
                 AsyncImage(
                     model = backdropPath.toImageUrl("w780"),
@@ -153,11 +180,24 @@ fun DetailContent(
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
+                                    Color.Black.copy(alpha = 0.08f),
+                                    Color.Black.copy(alpha = 0.38f),
+                                    Color.Black.copy(alpha = 0.94f)
+                                )
+                            )
+                        )
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.72f),
                                     Color.Transparent,
-                                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
-                                    MaterialTheme.colorScheme.background
-                                ),
-                                startY = 100f
+                                    Color.Black.copy(alpha = 0.16f)
+                                )
                             )
                         )
                 )
@@ -175,9 +215,14 @@ fun DetailContent(
                         contentDescription = title,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .width(85.dp)
-                            .height(125.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .width(92.dp)
+                            .height(136.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = 0.16f),
+                                shape = RoundedCornerShape(14.dp)
+                            )
                     )
 
                     Column(
@@ -186,46 +231,24 @@ fun DetailContent(
                     ) {
                         Text(
                             text = title,
-                            fontSize = 19.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 24.sp,
+                            lineHeight = 28.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(7.dp)
                         ) {
-                            Text(
-                                text = "${"%.1f".format(voteAverage)}/10",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            DetailMetaPill(text = "${"%.1f".format(voteAverage)}/10")
                             if (!releaseDate.isNullOrEmpty()) {
-                                Text(
-                                    text = "•",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 11.sp
-                                )
-                                Text(
-                                    text = releaseDate.take(4),
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                DetailMetaPill(text = releaseDate.take(4))
                             }
                             if (!extraInfo.isNullOrEmpty()) {
-                                Text(
-                                    text = "•",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 11.sp
-                                )
-                                Text(
-                                    text = extraInfo,
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                DetailMetaPill(text = extraInfo)
                             }
                         }
 
@@ -239,16 +262,17 @@ fun DetailContent(
 
                                 visible.forEach { genre ->
                                     Surface(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant
+                                        shape = RoundedCornerShape(50.dp),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                                     ) {
                                         Text(
                                             text = genre.name,
                                             fontSize = 10.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
                                             modifier = Modifier.padding(
                                                 horizontal = 8.dp,
-                                                vertical = 3.dp
+                                                vertical = 4.dp
                                             )
                                         )
                                     }
@@ -256,16 +280,17 @@ fun DetailContent(
 
                                 if (overflow > 0) {
                                     Surface(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant
+                                        shape = RoundedCornerShape(50.dp),
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                                     ) {
                                         Text(
                                             text = "+$overflow",
                                             fontSize = 10.sp,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
                                             modifier = Modifier.padding(
                                                 horizontal = 8.dp,
-                                                vertical = 3.dp
+                                                vertical = 4.dp
                                             )
                                         )
                                     }
@@ -280,7 +305,7 @@ fun DetailContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // Watch button with play icon
@@ -292,8 +317,8 @@ fun DetailContent(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp),
-                    shape = RoundedCornerShape(10.dp),
+                        .height(46.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
@@ -321,8 +346,15 @@ fun DetailContent(
                         },
                         modifier = Modifier
                             .weight(1f)
-                            .height(44.dp),
-                        shape = RoundedCornerShape(10.dp)
+                            .height(46.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        )
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Videocam,
@@ -341,9 +373,14 @@ fun DetailContent(
                 // Favorite button
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(onClick = onFavoriteClick) {
@@ -353,8 +390,8 @@ fun DetailContent(
                             else
                                 Icons.Filled.FavoriteBorder,
                             contentDescription = "Favorite",
-                            tint = if (isFavorite) Color.Red
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isFavorite) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -362,7 +399,7 @@ fun DetailContent(
             }
 
             // --- Overview ---
-            DetailSectionTitle(title = "Overview")
+            DetailSectionTitle(title = "Overview", icon = Icons.Filled.Info)
             Text(
                 text = overview,
                 style = MaterialTheme.typography.bodyMedium,
@@ -371,13 +408,13 @@ fun DetailContent(
                     end = 16.dp,
                     bottom = 24.dp
                 ),
-                lineHeight = 22.sp,
+                lineHeight = 23.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             // --- Cast ---
             if (cast.isNotEmpty()) {
-                DetailSectionTitle(title = "Cast")
+                DetailSectionTitle(title = "Cast", icon = Icons.Filled.Groups)
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -400,7 +437,7 @@ fun DetailContent(
                     }
                 ) {
                     Column {
-                        DetailSectionTitle(title = "Trailer")
+                        DetailSectionTitle(title = "Trailer", icon = Icons.Filled.Videocam)
                         YoutubePlayer(
                             youtubeKey = trailer.key,
                             modifier = Modifier.padding(
@@ -420,7 +457,7 @@ fun DetailContent(
                 }
             ) {
                 Column {
-                    DetailSectionTitle(title = "Watch")
+                    DetailSectionTitle(title = "Watch", icon = Icons.Filled.PlayArrow)
                     VidkingPlayer(
                         tmdbId = tmdbId,
                         isMovie = isMovie,
@@ -439,9 +476,30 @@ fun DetailContent(
     }
 }
 
+@Composable
+fun DetailMetaPill(text: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+        shape = RoundedCornerShape(50.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
+        )
+    }
+}
+
 // --- Section Title with accent bar ---
 @Composable
-fun DetailSectionTitle(title: String) {
+fun DetailSectionTitle(
+    title: String,
+    icon: ImageVector
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(
@@ -453,16 +511,30 @@ fun DetailSectionTitle(title: String) {
     ) {
         Box(
             modifier = Modifier
-                .width(4.dp)
-                .height(18.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(MaterialTheme.colorScheme.primary)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
+                .size(34.dp)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(11.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(17.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Black,
             color = MaterialTheme.colorScheme.onBackground
         )
     }
@@ -473,15 +545,21 @@ fun DetailSectionTitle(title: String) {
 fun CastCard(member: CastMemberDto) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(64.dp)
+        modifier = Modifier.width(72.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
+                .size(66.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                    shape = CircleShape
+                ),
             contentAlignment = Alignment.Center
-        ) {
+        )
+        {
             if (member.profilePath != null) {
                 AsyncImage(
                     model = member.profilePath.toImageUrl("w185"),

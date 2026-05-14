@@ -1,5 +1,7 @@
 package com.popcinefr.popcinefrapp.presentation.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +29,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import androidx.compose.foundation.background
 import com.popcinefr.popcinefrapp.util.toImageUrl
 
 @Composable
@@ -40,19 +41,20 @@ fun MediaCard(
 ) {
     Card(
         modifier = modifier
-            .width(150.dp)
-            .height(220.dp)
+            .width(144.dp)
+            .height(232.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+        )
     ) {
-        // Box lets us stack layers on top of each other
-        // Layer 1: poster image (bottom)
-        // Layer 2: gradient overlay (middle)
-        // Layer 3: text (top)
         Box(modifier = Modifier.fillMaxSize()) {
-
-            // --- Layer 1: Full poster image ---
             AsyncImage(
                 model = posterPath.toImageUrl("w342"),
                 contentDescription = title,
@@ -60,9 +62,6 @@ fun MediaCard(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // --- Layer 2: Gradient overlay at the bottom ---
-            // Goes from transparent at top to black at bottom
-            // This makes the white text readable over any poster
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -70,53 +69,62 @@ fun MediaCard(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.3f),
-                                Color.Black.copy(alpha = 0.85f)
-                            )
+                                Color.Black.copy(alpha = 0.08f),
+                                Color.Black.copy(alpha = 0.52f),
+                                Color.Black.copy(alpha = 0.92f)
+                            ),
+                            startY = 110f
                         )
                     )
             )
 
-            // --- Layer 3: Rating badge — top right ---
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.Black.copy(alpha = 0.6f))
-                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.92f))
+                    .padding(horizontal = 7.dp, vertical = 4.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "⭐",
-                        fontSize = 9.sp
+                        text = "★",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Text(
                         text = "${"%.1f".format(rating)}",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // --- Layer 4: Title + rating at the bottom ---
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .padding(10.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+                    .padding(start = 10.dp, end = 10.dp, bottom = 12.dp, top = 28.dp)
             ) {
                 Text(
                     text = title,
                     color = Color.White,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.5.sp,
+                    fontWeight = FontWeight.Black,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 17.sp
+                    lineHeight = 16.sp
                 )
             }
         }

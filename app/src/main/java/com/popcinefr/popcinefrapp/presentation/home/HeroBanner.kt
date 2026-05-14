@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -197,7 +198,7 @@ fun HeroBannerItem(
                     text = "${"%.1f".format(item.rating)}/10",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFF5C518)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 if (item.year.isNotEmpty()) {
                     Text(

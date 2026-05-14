@@ -18,34 +18,39 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -58,15 +63,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.popcinefr.popcinefrapp.data.remote.MediaItem
-import com.popcinefr.popcinefrapp.data.remote.MovieDto
-import com.popcinefr.popcinefrapp.data.remote.SeriesDto
 import com.popcinefr.popcinefrapp.presentation.components.MediaCard
-import com.popcinefr.popcinefrapp.presentation.components.MediaSection
 import com.popcinefr.popcinefrapp.util.Genre
 import com.popcinefr.popcinefrapp.util.UiState
 import com.popcinefr.popcinefrapp.util.movieGenres
 import com.popcinefr.popcinefrapp.util.seriesGenres
 import com.popcinefr.popcinefrapp.util.toImageUrl
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,23 +84,30 @@ fun HomeScreen(
 ) {
     val viewModel: HomeViewModel = viewModel()
     val selectedTab by viewModel.selectedTab.collectAsState()
-    val heroMovies by viewModel.heroMovies.collectAsState()
-    val heroSeries by viewModel.heroSeries.collectAsState()
     val mixedTrending by viewModel.mixedTrending.collectAsState()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "PopCineFR",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        letterSpacing = 0.5.sp
-                    )
+                    Column {
+                        Text(
+                            text = "PopCine",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 21.sp,
+                            letterSpacing = 0.5.sp
+                        )
+                        Text(
+                            text = "Cinema picks for tonight",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -107,9 +117,17 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                )
                 .verticalScroll(rememberScrollState())
         ) {
-
             // ── Spotlight: Top 3 trending as big numbered cards ──────────
             SpotlightSection(
                 uiState = mixedTrending,
@@ -158,46 +176,54 @@ fun SpotlightSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = 4.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.LocalFireDepartment,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.72f)
+                                )
+                            ),
+                            RoundedCornerShape(10.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.LocalFireDepartment,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Trending Now",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+                Column {
+                    Text(
+                        text = "Trending Now",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = "What everyone is watching",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onSeeAllClick() }
-            ) {
-                Text(
-                    text = "See all",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
+            SeeAllButton(onClick = onSeeAllClick)
         }
 
         when (uiState) {
@@ -222,15 +248,63 @@ fun SpotlightSection(
             is UiState.Success -> {
                 // Only top 10 — all as SpotlightCards with rank
                 val top10 = uiState.data.take(10)
+                val startIndex = remember(top10.size) {
+                    if (top10.size <= 1) 0
+                    else {
+                        val midpoint = Int.MAX_VALUE / 2
+                        midpoint - (midpoint % top10.size)
+                    }
+                }
+                val listState = rememberLazyListState(
+                    initialFirstVisibleItemIndex = startIndex
+                )
+                var autoScrolling by remember { mutableStateOf(false) }
+                var pauseUntil by remember { mutableLongStateOf(0L) }
+
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.isScrollInProgress }.collect { isScrolling ->
+                        if (isScrolling && !autoScrolling) {
+                            pauseUntil = System.currentTimeMillis() + 3500L
+                        }
+                    }
+                }
+
+                LaunchedEffect(top10.size) {
+                    if (top10.size <= 1) return@LaunchedEffect
+                    while (true) {
+                        delay(2800L)
+                        val remainingPause = pauseUntil - System.currentTimeMillis()
+                        if (remainingPause > 0L) delay(remainingPause)
+                        if (!listState.isScrollInProgress) {
+                            autoScrolling = true
+                            try {
+                                listState.animateScrollToItem(
+                                    listState.firstVisibleItemIndex + 1
+                                )
+                            } finally {
+                                autoScrolling = false
+                            }
+                        }
+                    }
+                }
 
                 LazyRow(
+                    state = listState,
                     contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    itemsIndexed(top10) { index, item ->
+                    items(
+                        count = if (top10.size > 1) Int.MAX_VALUE else top10.size,
+                        key = { index ->
+                            val item = top10[index % top10.size]
+                            "trending_${index}_${item.mediaType}_${item.id}"
+                        }
+                    ) { index ->
+                        val actualIndex = index % top10.size
+                        val item = top10[actualIndex]
                         SpotlightCard(
                             item = item,
-                            rank = index + 1,
+                            rank = actualIndex + 1,
                             onClick = { onItemClick(item) }
                         )
                     }
@@ -251,9 +325,14 @@ fun SpotlightCard(
 ) {
     Box(
         modifier = Modifier
-            .width(260.dp)
-            .height(150.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .width(286.dp)
+            .height(166.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(22.dp)
+            )
             .clickable { onClick() }
     ) {
         // Backdrop
@@ -271,8 +350,9 @@ fun SpotlightCard(
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            Color.Black.copy(alpha = 0.9f),
-                            Color.Black.copy(alpha = 0.2f)
+                            Color.Black.copy(alpha = 0.92f),
+                            Color.Black.copy(alpha = 0.36f),
+                            Color.Black.copy(alpha = 0.12f)
                         )
                     )
                 )
@@ -281,9 +361,9 @@ fun SpotlightCard(
         // Ghost rank number
         Text(
             text = "$rank",
-            fontSize = 90.sp,
+            fontSize = 102.sp,
             fontWeight = FontWeight.Black,
-            color = Color.White.copy(alpha = 0.06f),
+            color = Color.White.copy(alpha = 0.08f),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .offset(x = (-8).dp, y = 16.dp)
@@ -301,9 +381,9 @@ fun SpotlightCard(
                 modifier = Modifier
                     .background(
                         color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(8.dp)
                     )
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .padding(horizontal = 8.dp, vertical = 3.dp)
             ) {
                 Text(
                     text = "#$rank",
@@ -317,12 +397,12 @@ fun SpotlightCard(
 
             Text(
                 text = item.title,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Black,
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                lineHeight = 18.sp
+                lineHeight = 19.sp
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -335,7 +415,7 @@ fun SpotlightCard(
                     text = "${"%.1f".format(item.voteAverage)}",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFF5C518)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Box(
                     modifier = Modifier
@@ -360,7 +440,12 @@ fun SpotlightCard(
                 .padding(end = 12.dp)
                 .width(70.dp)
                 .height(105.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(
+                    width = 1.dp,
+                    color = Color.White.copy(alpha = 0.16f),
+                    shape = RoundedCornerShape(12.dp)
+                )
         )
     }
 }
@@ -376,24 +461,33 @@ fun CategorySwitcher(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 20.dp)
+            .padding(top = 18.dp, bottom = 22.dp)
     ) {
-        // Label
-        Text(
-            text = "Browse",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-        )
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Text(
+                text = "Browse",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = "Choose what to explore",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
+                .padding(5.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CategoryTab(
                 label = "Movies",
@@ -422,11 +516,10 @@ fun CategoryTab(
     modifier: Modifier = Modifier
 ) {
     val primary = MaterialTheme.colorScheme.primary
-    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
 
     Box(
         modifier = modifier
-            .height(56.dp)
+            .height(50.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(
                 if (isSelected)
@@ -438,12 +531,12 @@ fun CategoryTab(
                     )
                 else
                     Brush.linearGradient(
-                        colors = listOf(surfaceVariant, surfaceVariant)
+                        colors = listOf(Color.Transparent, Color.Transparent)
                     )
             )
             .border(
-                width = if (isSelected) 0.dp else 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                width = if (isSelected) 1.dp else 0.dp,
+                color = Color.White.copy(alpha = 0.14f),
                 shape = RoundedCornerShape(14.dp)
             )
             .clickable { onClick() },
@@ -550,21 +643,20 @@ fun MoviesContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // Genre section
-    GenreChipsSection(
+    GenreDropdownSection(
         genres = movieGenres,
         selectedGenre = selectedGenre,
-        onGenreSelected = { viewModel.loadMoviesByGenre(it) }
+        onGenreSelected = { viewModel.loadMoviesByGenre(it) },
+        onSeeAllClick = { onSeeAllMoviesByGenre(selectedGenre.id, selectedGenre.name) }
     )
 
-    MediaSection(
-        title = "",
+    GenreMediaCarousel(
         uiState = moviesByGenre,
         itemKey = { it.id },
         itemTitle = { it.title },
         itemPoster = { it.posterPath },
         itemRating = { it.voteAverage },
-        onItemClick = { onMovieClick(it.id) },
-        onSeeAllClick = { onSeeAllMoviesByGenre(selectedGenre.id, selectedGenre.name) }
+        onItemClick = { onMovieClick(it.id) }
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -646,21 +738,20 @@ fun SeriesContent(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    GenreChipsSection(
+    GenreDropdownSection(
         genres = seriesGenres,
         selectedGenre = selectedGenre,
-        onGenreSelected = { viewModel.loadSeriesByGenre(it) }
+        onGenreSelected = { viewModel.loadSeriesByGenre(it) },
+        onSeeAllClick = { onSeeAllSeriesByGenre(selectedGenre.id, selectedGenre.name) }
     )
 
-    MediaSection(
-        title = "",
+    GenreMediaCarousel(
         uiState = seriesByGenre,
         itemKey = { it.id },
         itemTitle = { it.name },
         itemPoster = { it.posterPath },
         itemRating = { it.voteAverage },
-        onItemClick = { onSeriesClick(it.id) },
-        onSeeAllClick = { onSeeAllSeriesByGenre(selectedGenre.id, selectedGenre.name) }
+        onItemClick = { onSeriesClick(it.id) }
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -686,47 +777,67 @@ fun SectionWithIcon(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(34.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(8.dp)
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(11.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color.White,
                     modifier = Modifier.size(16.dp)
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
         if (onSeeAllClick != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onSeeAllClick() }
-            ) {
-                Text(
-                    text = "See all",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
+            SeeAllButton(onClick = onSeeAllClick)
         }
+    }
+}
+
+@Composable
+fun SeeAllButton(onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                shape = RoundedCornerShape(50.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = "See all",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(2.dp))
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(14.dp)
+        )
     }
 }
 
@@ -753,79 +864,161 @@ fun ErrorRow(message: String) {
 }
 
 @Composable
-fun GenreChipsSection(
+fun GenreDropdownSection(
     genres: List<Genre>,
     selectedGenre: Genre,
-    onGenreSelected: (Genre) -> Unit
+    onGenreSelected: (Genre) -> Unit,
+    onSeeAllClick: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        GenreDropdown(
+            genres = genres,
+            selectedGenre = selectedGenre,
+            onGenreSelected = onGenreSelected,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        SeeAllButton(onClick = onSeeAllClick)
+    }
+}
+
+@Composable
+fun GenreDropdown(
+    genres: List<Genre>,
+    selectedGenre: Genre,
+    onGenreSelected: (Genre) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .clip(RoundedCornerShape(18.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .clickable { expanded = true }
+                .padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
                     .size(32.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(8.dp)
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(10.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "≡",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    text = "#",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White
                 )
             }
+
             Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                text = "Browse by Genre",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Genre",
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = selectedGenre.name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp)
             )
         }
 
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(bottom = 4.dp)
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
         ) {
-            items(genres) { genre ->
-                val isSelected = genre.id == selectedGenre.id
-                SuggestionChip(
-                    onClick = { onGenreSelected(genre) },
-                    label = {
+            genres.forEach { genre ->
+                DropdownMenuItem(
+                    text = {
                         Text(
                             text = genre.name,
-                            fontSize = 13.sp,
-                            fontWeight = if (isSelected) FontWeight.SemiBold
-                            else FontWeight.Normal
+                            fontWeight = if (genre.id == selectedGenre.id)
+                                FontWeight.Bold
+                            else
+                                FontWeight.Medium,
+                            color = if (genre.id == selectedGenre.id)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                     },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = if (isSelected)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.surfaceVariant,
-                        labelColor = if (isSelected)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    border = if (isSelected) null
-                    else SuggestionChipDefaults.suggestionChipBorder(
-                        enabled = true,
-                        borderColor = MaterialTheme.colorScheme.outline.copy(
-                            alpha = 0.3f
-                        )
-                    )
+                    onClick = {
+                        expanded = false
+                        onGenreSelected(genre)
+                    }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> GenreMediaCarousel(
+    uiState: UiState<List<T>>,
+    itemKey: (T) -> Int,
+    itemTitle: (T) -> String,
+    itemPoster: (T) -> String?,
+    itemRating: (T) -> Double,
+    onItemClick: (T) -> Unit
+) {
+    when (uiState) {
+        is UiState.Loading -> LoadingRow()
+        is UiState.Error -> ErrorRow(uiState.message)
+        is UiState.Success -> {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(
+                    items = uiState.data,
+                    key = { itemKey(it) }
+                ) { item ->
+                    MediaCard(
+                        title = itemTitle(item),
+                        posterPath = itemPoster(item),
+                        rating = itemRating(item),
+                        onClick = { onItemClick(item) }
+                    )
+                }
             }
         }
     }

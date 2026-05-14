@@ -46,7 +46,7 @@ fun MovieDetailScreen(
                 backdropPath = movie.backdropPath,
                 voteAverage = movie.voteAverage,
                 releaseDate = movie.releaseDate,
-                extraInfo = movie.runtime?.let { "🕐 $it min" },
+                extraInfo = movie.runtime?.let { "$it min" },
                 genres = movie.genres,
                 videos = movie.videos.results,
                 cast = movie.credits.cast,      // ← add this

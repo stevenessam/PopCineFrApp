@@ -1,6 +1,7 @@
 package com.popcinefr.popcinefrapp.presentation.search
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,17 +53,26 @@ fun SearchScreen(
     val seriesState by viewModel.seriesState.collectAsState()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Search",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
+                    Column {
+                        Text(
+                            text = "Search",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 21.sp
+                        )
+                        Text(
+                            text = "Find your next watch",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -69,6 +82,15 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                )
         ) {
 
             // --- Search Field ---
@@ -77,7 +99,13 @@ fun SearchScreen(
                 onValueChange = { viewModel.onSearchQueryChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                        shape = RoundedCornerShape(18.dp)
+                    ),
                 placeholder = {
                     Text(
                         text = "Movies, series, actors...",
@@ -108,12 +136,12 @@ fun SearchScreen(
                     }
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                    unfocusedBorderColor = Color.Transparent,
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    unfocusedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                 )
             )
 
@@ -129,9 +157,14 @@ fun SearchScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(72.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceVariant,
+                            .size(72.dp)
+                            .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                                        )
+                                    ),
                                     shape = RoundedCornerShape(20.dp)
                                 ),
                             contentAlignment = Alignment.Center
@@ -139,7 +172,7 @@ fun SearchScreen(
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = Color.White,
                                 modifier = Modifier.size(36.dp)
                             )
                         }

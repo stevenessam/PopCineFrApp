@@ -1,6 +1,8 @@
 package com.popcinefr.popcinefrapp.presentation.favorites
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +42,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,17 +72,26 @@ fun FavoritesScreen(
     else favoriteSeries.take(6)
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Favorites",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
+                    Column {
+                        Text(
+                            text = "Favorites",
+                            fontWeight = FontWeight.Black,
+                            fontSize = 21.sp
+                        )
+                        Text(
+                            text = "Your saved cinema shelf",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -86,7 +102,16 @@ fun FavoritesScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(paddingValues)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                                MaterialTheme.colorScheme.background
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -97,7 +122,12 @@ fun FavoritesScreen(
                         modifier = Modifier
                             .size(72.dp)
                             .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                                    )
+                                ),
                                 shape = RoundedCornerShape(20.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -105,7 +135,7 @@ fun FavoritesScreen(
                         Icon(
                             imageVector = Icons.Filled.FavoriteBorder,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = Color.White,
                             modifier = Modifier.size(36.dp)
                         )
                     }
@@ -127,7 +157,16 @@ fun FavoritesScreen(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(paddingValues)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                                MaterialTheme.colorScheme.background
+                            )
+                        )
+                    ),
                 contentPadding = PaddingValues(
                     start = 12.dp,
                     end = 12.dp,
@@ -143,6 +182,7 @@ fun FavoritesScreen(
                     item(span = { GridItemSpan(3) }) {
                         FavoritesSectionHeader(
                             title = "Movies",
+                            icon = Icons.Filled.Movie,
                             count = favoriteMovies.size,
                             showSeeAll = !showAllMovies && favoriteMovies.size > 6,
                             onSeeAllClick = { showAllMovies = true }
@@ -182,6 +222,7 @@ fun FavoritesScreen(
                     item(span = { GridItemSpan(3) }) {
                         FavoritesSectionHeader(
                             title = "Series",
+                            icon = Icons.Filled.Tv,
                             count = favoriteSeries.size,
                             showSeeAll = !showAllSeries && favoriteSeries.size > 6,
                             onSeeAllClick = { showAllSeries = true },
@@ -224,6 +265,7 @@ fun FavoritesScreen(
 @Composable
 fun FavoritesSectionHeader(
     title: String,
+    icon: ImageVector,
     count: Int,
     showSeeAll: Boolean = false,
     onSeeAllClick: () -> Unit = {},
@@ -239,23 +281,37 @@ fun FavoritesSectionHeader(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
-                    .width(4.dp)
-                    .height(18.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+                    .size(34.dp)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(11.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(horizontal = 8.dp, vertical = 2.dp)
@@ -263,27 +319,37 @@ fun FavoritesSectionHeader(
                 Text(
                     text = "$count",
                     fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
         }
 
         if (showSeeAll) {
-            TextButton(
-                onClick = onSeeAllClick,
-                contentPadding = PaddingValues(0.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .clickable { onSeeAllClick() }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
                 Text(
                     text = "See all",
                     fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(14.dp)
                 )
             }

@@ -47,7 +47,7 @@ fun SeriesDetailScreen(
                 voteAverage = series.voteAverage,
                 releaseDate = series.firstAirDate,
                 extraInfo = series.numberOfSeasons?.let {
-                    "📺 $it seasons · ${series.numberOfEpisodes} episodes"
+                    "$it seasons · ${series.numberOfEpisodes} episodes"
                 },
                 genres = series.genres,
                 videos = series.videos.results,
