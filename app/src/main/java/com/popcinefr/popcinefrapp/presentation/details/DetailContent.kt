@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -282,6 +283,7 @@ fun DetailContent(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // Watch button with play icon
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -297,7 +299,7 @@ fun DetailContent(
                     )
                 ) {
                     Icon(
-                        Icons.Filled.PlayArrow,
+                        imageVector = Icons.Filled.PlayArrow,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -309,6 +311,7 @@ fun DetailContent(
                     )
                 }
 
+                // Trailer button with video cam icon
                 if (trailer != null) {
                     OutlinedButton(
                         onClick = {
@@ -321,6 +324,12 @@ fun DetailContent(
                             .height(44.dp),
                         shape = RoundedCornerShape(10.dp)
                     ) {
+                        Icon(
+                            imageVector = Icons.Filled.Videocam,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Trailer",
                             fontWeight = FontWeight.SemiBold,
@@ -329,6 +338,7 @@ fun DetailContent(
                     }
                 }
 
+                // Favorite button
                 Box(
                     modifier = Modifier
                         .size(44.dp)

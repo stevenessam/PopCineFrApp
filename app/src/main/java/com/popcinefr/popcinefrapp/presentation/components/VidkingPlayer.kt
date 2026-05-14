@@ -12,10 +12,12 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,7 +47,23 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 
-// Custom WebView that takes full ownership of all touch events
+// Known ad domains to block
+private val AD_DOMAINS = listOf(
+    "doubleclick.net",
+    "googlesyndication.com",
+    "googleadservices.com",
+    "adnxs.com",
+    "advertising.com",
+    "outbrain.com",
+    "taboola.com",
+    "exoclick.com",
+    "trafficjunky.net",
+    "juicyads.com",
+    "hilltopads.net",
+    "adsterra.com",
+    "propellerads.com"
+)
+
 class TouchableWebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -76,22 +94,14 @@ fun VidkingPlayer(
     val context = LocalContext.current
     val activity = context as Activity
 
-    // State that controls whether to show the thumbnail+play button
-    // or the actual WebView player
-    // false = show thumbnail with play button overlay
-    // true = show the real WebView player
     var isPlayerLoaded by remember { mutableStateOf(false) }
 
-    // autoPlay=true because the user already tapped our custom play button
-    // so we start playing immediately when the WebView loads
     val embedUrl = if (isMovie) {
         "https://www.vidking.net/embed/movie/$tmdbId?color=e50914&autoPlay=true"
     } else {
         "https://www.vidking.net/embed/tv/$tmdbId/$season/$episode?color=e50914&autoPlay=true&nextEpisode=true&episodeSelector=true"
     }
 
-    // YouTube thumbnail as preview — always available for any TMDB content
-    // We use the TMDB poster as fallback background
     val thumbnailUrl = "https://image.tmdb.org/t/p/w780$thumbnailPath"
 
     val webView = remember {
@@ -101,12 +111,21 @@ fun VidkingPlayer(
                     view: WebView?,
                     request: WebResourceRequest?
                 ): Boolean {
-                    return false
+                    val url = request?.url?.toString() ?: return false
+
+                    // Block known ad domains
+                    val isAd = AD_DOMAINS.any { domain -> url.contains(domain) }
+                    if (isAd) return true // block the request
+
+                    // Block popups — any navigation away from vidking
+                    val isVidking = url.contains("vidking.net")
+                    if (!isVidking) return true // block external navigations
+
+                    return false // allow vidking URLs
                 }
             }
 
             webChromeClient = object : WebChromeClient() {
-
                 private var customView: View? = null
                 private var customViewCallback: CustomViewCallback? = null
                 private var originalSystemUiVisibility = 0
@@ -119,12 +138,10 @@ fun VidkingPlayer(
                         onHideCustomView()
                         return
                     }
-
                     customView = view
                     customViewCallback = callback
                     originalSystemUiVisibility =
                         activity.window.decorView.systemUiVisibility
-
                     val decorView = activity.window.decorView as ViewGroup
                     decorView.addView(
                         customView,
@@ -133,12 +150,10 @@ fun VidkingPlayer(
                             ViewGroup.LayoutParams.MATCH_PARENT
                         )
                     )
-
                     activity.window.decorView.systemUiVisibility =
                         View.SYSTEM_UI_FLAG_FULLSCREEN or
                                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
                                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
                     activity.window.addFlags(
                         WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     )
@@ -148,14 +163,11 @@ fun VidkingPlayer(
                     val decorView = activity.window.decorView as ViewGroup
                     decorView.removeView(customView)
                     customView = null
-
                     activity.window.decorView.systemUiVisibility =
                         originalSystemUiVisibility
-
                     activity.window.clearFlags(
                         WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                     )
-
                     customViewCallback?.onCustomViewHidden()
                     customViewCallback = null
                 }
@@ -174,7 +186,22 @@ fun VidkingPlayer(
                 setSupportZoom(false)
                 builtInZoomControls = false
                 displayZoomControls = false
+                // Disable opening new windows — prevents popup ads
+                javaScriptCanOpenWindowsAutomatically = false
+                setSupportMultipleWindows(false)
             }
+        }
+    }
+
+    // BackHandler intercepts the phone back button when player is loaded
+    // Instead of going back in the app, we go back inside the WebView
+    if (isPlayerLoaded) {
+        BackHandler {
+            if (webView.canGoBack()) {
+                webView.goBack()
+            }
+            // If WebView can't go back, do nothing
+            // This prevents accidentally going back to home
         }
     }
 
@@ -185,16 +212,13 @@ fun VidkingPlayer(
             .clip(RoundedCornerShape(12.dp))
     ) {
         if (!isPlayerLoaded) {
-            // --- Thumbnail + Play Button Overlay ---
-            // This is what the user sees before tapping play
-            // It's a normal Compose button — no WebView conflict at all
+            // Thumbnail + Play Button
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                // Backdrop as background
                 AsyncImage(
                     model = thumbnailUrl,
                     contentDescription = "Preview",
@@ -202,23 +226,18 @@ fun VidkingPlayer(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Dark overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.45f))
                 )
 
-                // Play button — this is a regular Compose button
-                // No WebView = no touch conflict = works perfectly
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     IconButton(
                         onClick = {
-                            // User tapped our button — NOW load the WebView
-                            // autoPlay=true means it starts immediately
                             webView.loadUrl(embedUrl)
                             isPlayerLoaded = true
                         },
@@ -237,22 +256,17 @@ fun VidkingPlayer(
                         )
                     }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     Text(
                         text = if (isMovie) "Play Movie" else "Play Series",
                         color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.then(
-                            Modifier.background(Color.Transparent)
-                        )
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         } else {
-            // --- Real WebView Player ---
-            // Only shown after user taps play
-            // autoPlay=true so it starts immediately without needing
-            // to tap anything inside the WebView
             AndroidView(
                 factory = { webView },
                 modifier = Modifier.fillMaxSize()

@@ -25,11 +25,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +54,15 @@ fun FavoritesScreen(
     val favoriteMovies by viewModel.favoriteMovies.collectAsState()
     val favoriteSeries by viewModel.favoriteSeries.collectAsState()
 
+    // Track whether to show all movies or just first 6
+    var showAllMovies by remember { mutableStateOf(false) }
+    var showAllSeries by remember { mutableStateOf(false) }
+
+    val displayedMovies = if (showAllMovies) favoriteMovies
+    else favoriteMovies.take(6)
+    val displayedSeries = if (showAllSeries) favoriteSeries
+    else favoriteSeries.take(6)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -68,6 +81,7 @@ fun FavoritesScreen(
     ) { paddingValues ->
 
         if (favoriteMovies.isEmpty() && favoriteSeries.isEmpty()) {
+            // Empty state
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -108,8 +122,6 @@ fun FavoritesScreen(
                 }
             }
         } else {
-            // Grid layout — 3 columns
-            // Uses GridItemSpan for section headers that span all columns
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
@@ -124,17 +136,20 @@ fun FavoritesScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Movies section header
+
+                // Movies section
                 if (favoriteMovies.isNotEmpty()) {
                     item(span = { GridItemSpan(3) }) {
                         FavoritesSectionHeader(
                             title = "Movies",
-                            count = favoriteMovies.size
+                            count = favoriteMovies.size,
+                            showSeeAll = !showAllMovies && favoriteMovies.size > 6,
+                            onSeeAllClick = { showAllMovies = true }
                         )
                     }
 
                     items(
-                        items = favoriteMovies,
+                        items = displayedMovies,
                         key = { "movie_${it.id}" }
                     ) { item ->
                         MediaCard(
@@ -144,20 +159,37 @@ fun FavoritesScreen(
                             onClick = { onMovieClick(item.id) }
                         )
                     }
+
+                    // Show less option
+                    if (showAllMovies && favoriteMovies.size > 6) {
+                        item(span = { GridItemSpan(3) }) {
+                            TextButton(
+                                onClick = { showAllMovies = false },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Show less",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
                 }
 
-                // Series section header
+                // Series section
                 if (favoriteSeries.isNotEmpty()) {
                     item(span = { GridItemSpan(3) }) {
                         FavoritesSectionHeader(
                             title = "Series",
                             count = favoriteSeries.size,
+                            showSeeAll = !showAllSeries && favoriteSeries.size > 6,
+                            onSeeAllClick = { showAllSeries = true },
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
 
                     items(
-                        items = favoriteSeries,
+                        items = displayedSeries,
                         key = { "series_${it.id}" }
                     ) { item ->
                         MediaCard(
@@ -167,55 +199,86 @@ fun FavoritesScreen(
                             onClick = { onSeriesClick(item.id) }
                         )
                     }
+
+                    // Show less option
+                    if (showAllSeries && favoriteSeries.size > 6) {
+                        item(span = { GridItemSpan(3) }) {
+                            TextButton(
+                                onClick = { showAllSeries = false },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Show less",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-// Section header spanning full grid width
 @Composable
 fun FavoritesSectionHeader(
     title: String,
     count: Int,
+    showSeeAll: Boolean = false,
+    onSeeAllClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height(18.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(MaterialTheme.colorScheme.primary)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = title,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        // Item count badge
-        Box(
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .padding(horizontal = 8.dp, vertical = 2.dp)
-        ) {
-            Text(
-                text = "$count",
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(18.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.primary)
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = "$count",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        if (showSeeAll) {
+            TextButton(
+                onClick = onSeeAllClick,
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text(
+                    text = "See all",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

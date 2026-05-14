@@ -23,6 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +36,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,6 +130,8 @@ fun HomeScreen(
             )
 
             // --- Mixed Trending Section ---
+            Spacer(modifier = Modifier.height(20.dp))
+
             MixedTrendingSection(
                 uiState = mixedTrending,
                 onItemClick = { item ->
@@ -133,11 +141,15 @@ fun HomeScreen(
                 onSeeAllClick = onSeeAllMixed
             )
 
-            // --- Tab Bar ---
-            HomeTabBar(
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- Gradient Divider with Tab Selector ---
+            GradientTabDivider(
                 selectedTab = selectedTab,
                 onTabSelected = { viewModel.onTabSelected(it) }
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // --- Tab Content ---
             if (selectedTab == HomeTab.MOVIES) {
@@ -155,6 +167,124 @@ fun HomeScreen(
                     onSeeAllSeriesByGenre = onSeeAllSeriesByGenre
                 )
             }
+        }
+    }
+}
+
+// --- Gradient Divider with Tab in the middle ---
+@Composable
+fun GradientTabDivider(
+    selectedTab: HomeTab,
+    onTabSelected: (HomeTab) -> Unit
+) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val surfaceColor = MaterialTheme.colorScheme.surface
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        // Gradient lines on both sides
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left gradient line
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                primaryColor.copy(alpha = 0.4f)
+                            )
+                        )
+                    )
+            )
+
+            // Center tab switcher
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(4.dp)
+            ) {
+                Row {
+                    // Movies tab
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                if (selectedTab == HomeTab.MOVIES)
+                                    primaryColor
+                                else
+                                    Color.Transparent
+                            )
+                            .clickable { onTabSelected(HomeTab.MOVIES) }
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Movies",
+                            fontSize = 13.sp,
+                            fontWeight = if (selectedTab == HomeTab.MOVIES)
+                                FontWeight.Bold
+                            else
+                                FontWeight.Normal,
+                            color = if (selectedTab == HomeTab.MOVIES)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Series tab
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                if (selectedTab == HomeTab.SERIES)
+                                    primaryColor
+                                else
+                                    Color.Transparent
+                            )
+                            .clickable { onTabSelected(HomeTab.SERIES) }
+                            .padding(horizontal = 20.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Series",
+                            fontSize = 13.sp,
+                            fontWeight = if (selectedTab == HomeTab.SERIES)
+                                FontWeight.Bold
+                            else
+                                FontWeight.Normal,
+                            color = if (selectedTab == HomeTab.SERIES)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Right gradient line
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                primaryColor.copy(alpha = 0.4f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+            )
         }
     }
 }
@@ -246,50 +376,7 @@ fun MixedTrendingSection(
     }
 }
 
-// --- Tab Bar ---
-@Composable
-fun HomeTabBar(
-    selectedTab: HomeTab,
-    onTabSelected: (HomeTab) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-    ) {
-        HomeTab.values().forEach { tab ->
-            val isSelected = selectedTab == tab
-            val label = if (tab == HomeTab.MOVIES) "Movies" else "Series"
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { onTabSelected(tab) }
-                    .padding(vertical = 10.dp)
-            ) {
-                Text(
-                    text = label,
-                    fontSize = 14.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected)
-                        MaterialTheme.colorScheme.onBackground
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .width(if (isSelected) 32.dp else 0.dp)
-                        .height(2.dp)
-                        .clip(RoundedCornerShape(1.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-            }
-        }
-    }
-}
-
-// --- Movies Tab ---
+// --- Movies Content ---
 @Composable
 fun MoviesContent(
     viewModel: HomeViewModel,
@@ -297,22 +384,10 @@ fun MoviesContent(
     onSeeAllMovies: (String) -> Unit,
     onSeeAllMoviesByGenre: (Int, String) -> Unit
 ) {
-    val trendingMovies by viewModel.trendingMovies.collectAsState()
-    val mostWatchedMovies by viewModel.mostWatchedMovies.collectAsState()
     val nowPlayingMovies by viewModel.nowPlayingMovies.collectAsState()
+    val mostWatchedMovies by viewModel.mostWatchedMovies.collectAsState()
     val moviesByGenre by viewModel.moviesByGenre.collectAsState()
     val selectedGenre by viewModel.selectedMovieGenre.collectAsState()
-
-    MediaSection(
-        title = "Trending",
-        uiState = trendingMovies,
-        itemKey = { it.id },
-        itemTitle = { it.title },
-        itemPoster = { it.posterPath },
-        itemRating = { it.voteAverage },
-        onItemClick = { onMovieClick(it.id) },
-        onSeeAllClick = { onSeeAllMovies("trending") }
-    )
 
     MediaSection(
         title = "Now Playing",
@@ -356,7 +431,7 @@ fun MoviesContent(
     Spacer(modifier = Modifier.height(16.dp))
 }
 
-// --- Series Tab ---
+// --- Series Content ---
 @Composable
 fun SeriesContent(
     viewModel: HomeViewModel,
@@ -364,22 +439,10 @@ fun SeriesContent(
     onSeeAllSeries: (String) -> Unit,
     onSeeAllSeriesByGenre: (Int, String) -> Unit
 ) {
-    val trendingSeries by viewModel.trendingSeries.collectAsState()
-    val mostWatchedSeries by viewModel.mostWatchedSeries.collectAsState()
     val onTheAirSeries by viewModel.onTheAirSeries.collectAsState()
+    val mostWatchedSeries by viewModel.mostWatchedSeries.collectAsState()
     val seriesByGenre by viewModel.seriesByGenre.collectAsState()
     val selectedGenre by viewModel.selectedSeriesGenre.collectAsState()
-
-    MediaSection(
-        title = "Trending",
-        uiState = trendingSeries,
-        itemKey = { it.id },
-        itemTitle = { it.name },
-        itemPoster = { it.posterPath },
-        itemRating = { it.voteAverage },
-        onItemClick = { onSeriesClick(it.id) },
-        onSeeAllClick = { onSeeAllSeries("trending") }
-    )
 
     MediaSection(
         title = "On The Air",
