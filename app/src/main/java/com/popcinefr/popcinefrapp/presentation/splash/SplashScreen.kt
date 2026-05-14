@@ -51,7 +51,7 @@ fun SplashScreen(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "PopCine Logo",
             modifier = Modifier
-                .size(180.dp)
+                .size(200.dp)
                 .alpha(alpha)
         )
     }

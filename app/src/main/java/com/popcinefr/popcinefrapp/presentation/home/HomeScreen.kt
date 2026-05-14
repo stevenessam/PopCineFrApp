@@ -870,21 +870,64 @@ fun GenreDropdownSection(
     onGenreSelected: (Genre) -> Unit,
     onSeeAllClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        GenreDropdown(
-            genres = genres,
-            selectedGenre = selectedGenre,
-            onGenreSelected = onGenreSelected,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        SeeAllButton(onClick = onSeeAllClick)
+        // First row: Icon + Title (like other sections)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(11.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Movie,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Discover by Genre",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        }
+
+        // Second row: Dropdown + See All button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            GenreDropdown(
+                genres = genres,
+                selectedGenre = selectedGenre,
+                onGenreSelected = onGenreSelected,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            SeeAllButton(onClick = onSeeAllClick)
+        }
     }
 }
 
@@ -911,46 +954,17 @@ fun GenreDropdown(
                 .padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(10.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "#",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White
-                )
-            }
+            Text(
+                text = selectedGenre.name,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
 
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Genre",
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = selectedGenre.name,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Spacer(modifier = Modifier.width(8.dp))
 
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
