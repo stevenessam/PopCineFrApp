@@ -951,7 +951,7 @@ fun GenreDropdown(
                     shape = RoundedCornerShape(18.dp)
                 )
                 .clickable { expanded = true }
-                .padding(horizontal = 12.dp, vertical = 9.dp),
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
