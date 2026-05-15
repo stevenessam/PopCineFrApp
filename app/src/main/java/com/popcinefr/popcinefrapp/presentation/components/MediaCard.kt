@@ -2,6 +2,7 @@ package com.popcinefr.popcinefrapp.presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -83,21 +88,26 @@ fun MediaCard(
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .clip(RoundedCornerShape(50.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.92f))
-                    .padding(horizontal = 7.dp, vertical = 4.dp)
+                    .background(Color.Black.copy(alpha = 0.65f))
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(50.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "★",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFFFD700), // Gold
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(modifier = Modifier.width(2.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${"%.1f".format(rating)}",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 10.sp,
+                        color = Color.White,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
