@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -204,13 +205,16 @@ fun FavoritesScreen(
                     // Show less option
                     if (showAllMovies && favoriteMovies.size > 6) {
                         item(span = { GridItemSpan(3) }) {
-                            TextButton(
-                                onClick = { showAllMovies = false },
-                                modifier = Modifier.fillMaxWidth()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
+                                FavoritesActionBtn(
                                     text = "Show less",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    icon = Icons.Filled.KeyboardArrowUp,
+                                    onClick = { showAllMovies = false }
                                 )
                             }
                         }
@@ -245,13 +249,16 @@ fun FavoritesScreen(
                     // Show less option
                     if (showAllSeries && favoriteSeries.size > 6) {
                         item(span = { GridItemSpan(3) }) {
-                            TextButton(
-                                onClick = { showAllSeries = false },
-                                modifier = Modifier.fillMaxWidth()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
+                                FavoritesActionBtn(
                                     text = "Show less",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    icon = Icons.Filled.KeyboardArrowUp,
+                                    onClick = { showAllSeries = false }
                                 )
                             }
                         }
@@ -326,33 +333,47 @@ fun FavoritesSectionHeader(
         }
 
         if (showSeeAll) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                        shape = RoundedCornerShape(50.dp)
-                    )
-                    .clickable { onSeeAllClick() }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "See all",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
+            FavoritesActionBtn(
+                text = "See all",
+                icon = Icons.AutoMirrored.Filled.ArrowForward,
+                onClick = onSeeAllClick
+            )
         }
+    }
+}
+
+@Composable
+fun FavoritesActionBtn(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(RoundedCornerShape(50.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                shape = RoundedCornerShape(50.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(modifier = Modifier.width(2.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(14.dp)
+        )
     }
 }
