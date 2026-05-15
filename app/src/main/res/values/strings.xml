@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">PopCine</string>
+    <string name="cinema_picks_subtitle">Cinema picks for tonight</string>
+    <string name="trending_now">Trending Now</string>
+    <string name="trending_subtitle">What everyone is watching</string>
+    <string name="browse">Browse</string>
+    <string name="browse_subtitle">Choose what to explore</string>
+    <string name="movies">Movies</string>
+    <string name="series">Series</string>
+    <string name="see_all">See All</string>
+    <string name="search">Search</string>
+    <string name="favorites">Favorites</string>
+    <string name="home">Home</string>
+    <string name="error_loading">Error loading data</string>
+    <string name="retry">Retry</string>
+    <string name="no_favorites">No favorites yet</string>
+    <string name="search_placeholder">Search for movies or series…</string>
+    <string name="loading">Loading…</string>
+    <string name="no_results">No results found</string>
 </resources>

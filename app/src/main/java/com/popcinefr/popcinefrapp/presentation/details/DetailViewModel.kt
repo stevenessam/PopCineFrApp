@@ -1,4 +1,4 @@
-package com.popcinefr.popcinefrapp.presentation.detail
+package com.popcinefr.popcinefrapp.presentation.details
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

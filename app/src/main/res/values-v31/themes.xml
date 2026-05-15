@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.PopCineFrApp" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowDisablePreview">true</item>
-        <item name="android:windowBackground">@color/splash_background</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
-        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_transparent_icon</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0F172A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.PopCineFrApp</item>
     </style>
 </resources>

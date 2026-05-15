@@ -12,7 +12,11 @@ object RetrofitInstance {
     // The logging interceptor prints every API request and response
     // in your Logcat — extremely useful for debugging
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = if (BuildConfig.DEBUG) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.NONE
+        }
     }
 
     // OkHttp is the HTTP client that does the actual networking

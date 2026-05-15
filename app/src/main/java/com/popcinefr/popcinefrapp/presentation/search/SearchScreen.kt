@@ -39,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.popcinefr.popcinefrapp.R
 import com.popcinefr.popcinefrapp.presentation.components.MediaSection
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +61,7 @@ fun SearchScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Search",
+                            text = stringResource(R.string.search),
                             fontWeight = FontWeight.Black,
                             fontSize = 21.sp
                         )
@@ -108,7 +110,7 @@ fun SearchScreen(
                     ),
                 placeholder = {
                     Text(
-                        text = "Movies, series, actors...",
+                        text = stringResource(R.string.search_placeholder),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
@@ -197,7 +199,7 @@ fun SearchScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     MediaSection(
-                        title = "Movies",
+                        title = stringResource(R.string.movies),
                         uiState = moviesState,
                         itemKey = { it.id },
                         itemTitle = { it.title },
@@ -207,7 +209,7 @@ fun SearchScreen(
                     )
 
                     MediaSection(
-                        title = "Series",
+                        title = stringResource(R.string.series),
                         uiState = seriesState,
                         itemKey = { it.id },
                         itemTitle = { it.name },

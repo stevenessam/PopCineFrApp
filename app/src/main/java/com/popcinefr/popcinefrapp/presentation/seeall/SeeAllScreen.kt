@@ -35,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.res.stringResource
+import com.popcinefr.popcinefrapp.R
 import com.popcinefr.popcinefrapp.presentation.components.MediaCard
 import com.popcinefr.popcinefrapp.util.UiState
 
@@ -117,7 +119,7 @@ fun <T> SeeAllScreen(
                     ) {
                         CircularProgressIndicator()
                         Text(
-                            text = "Loading...",
+                            text = stringResource(R.string.loading),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp
                         )
@@ -168,7 +170,7 @@ fun <T> SeeAllScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No results found",
+                            text = stringResource(R.string.no_results),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

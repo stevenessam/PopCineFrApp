@@ -17,10 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,33 +58,7 @@ fun <T> MediaSection(
                 )
             }
             if (onSeeAllClick != null) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                            shape = RoundedCornerShape(50.dp)
-                        )
-                        .clickable { onSeeAllClick() }
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "See all",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+                SeeAllButton(onClick = onSeeAllClick)
             }
         }
 

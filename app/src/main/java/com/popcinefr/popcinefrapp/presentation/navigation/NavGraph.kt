@@ -14,8 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.popcinefr.popcinefrapp.presentation.detail.MovieDetailScreen
-import com.popcinefr.popcinefrapp.presentation.detail.SeriesDetailScreen
+import com.popcinefr.popcinefrapp.presentation.details.MovieDetailScreen
+import com.popcinefr.popcinefrapp.presentation.details.SeriesDetailScreen
 import com.popcinefr.popcinefrapp.presentation.favorites.FavoritesScreen
 import com.popcinefr.popcinefrapp.presentation.home.HomeScreen
 import com.popcinefr.popcinefrapp.presentation.home.HomeViewModel

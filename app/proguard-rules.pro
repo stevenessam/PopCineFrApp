@@ -19,3 +19,32 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ProGuard rules for PopCineFrApp
+
+# Retrofit
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keepattributes AnnotationDefault
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+
+# Gson
+-keep class com.google.gson.** { *; }
+-keep class com.popcinefr.popcinefrapp.data.remote.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# Room
+-keep class androidx.room.** { *; }
+-dontwarn androidx.room.**
+
+# Material Design
+-keep class com.google.android.material.** { *; }
+
+# Preserve line numbers for crash reporting (useful even in release)
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile

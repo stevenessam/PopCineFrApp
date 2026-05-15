@@ -50,6 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
+import com.popcinefr.popcinefrapp.R
 import com.popcinefr.popcinefrapp.data.local.entity.FavoriteEntity
 import com.popcinefr.popcinefrapp.presentation.components.MediaCard
 
@@ -79,7 +81,7 @@ fun FavoritesScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Favorites",
+                            text = stringResource(R.string.favorites),
                             fontWeight = FontWeight.Black,
                             fontSize = 21.sp
                         )
@@ -141,7 +143,7 @@ fun FavoritesScreen(
                         )
                     }
                     Text(
-                        text = "No favorites yet",
+                        text = stringResource(R.string.no_favorites),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -182,7 +184,7 @@ fun FavoritesScreen(
                 if (favoriteMovies.isNotEmpty()) {
                     item(span = { GridItemSpan(3) }) {
                         FavoritesSectionHeader(
-                            title = "Movies",
+                            title = stringResource(R.string.movies),
                             icon = Icons.Filled.Movie,
                             count = favoriteMovies.size,
                             showSeeAll = !showAllMovies && favoriteMovies.size > 6,
@@ -225,7 +227,7 @@ fun FavoritesScreen(
                 if (favoriteSeries.isNotEmpty()) {
                     item(span = { GridItemSpan(3) }) {
                         FavoritesSectionHeader(
-                            title = "Series",
+                            title = stringResource(R.string.series),
                             icon = Icons.Filled.Tv,
                             count = favoriteSeries.size,
                             showSeeAll = !showAllSeries && favoriteSeries.size > 6,

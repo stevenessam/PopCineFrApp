@@ -20,8 +20,11 @@ import com.popcinefr.popcinefrapp.presentation.navigation.NavGraph
 import com.popcinefr.popcinefrapp.presentation.splash.SplashScreen
 import com.popcinefr.popcinefrapp.ui.theme.PopCineFrAppTheme
 
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()

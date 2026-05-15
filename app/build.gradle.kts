@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -18,15 +20,23 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // TMDB API Key — we'll fill this in next step
-        buildConfigField("String", "TMDB_API_KEY", "\"bb35a37a746210f4a461e65c0b594909\"")
+        // Load TMDB API Key from local.properties
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+        val tmdbApiKey = localProperties.getProperty("tmdb.api.key") ?: ""
+
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
         buildConfigField("String", "TMDB_BASE_URL", "\"https://api.themoviedb.org/3/\"")
         buildConfigField("String", "TMDB_IMAGE_BASE_URL", "\"https://image.tmdb.org/t/p/\"")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -97,4 +107,5 @@ dependencies {
 
     implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.compose.foundation:foundation:1.7.6")
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

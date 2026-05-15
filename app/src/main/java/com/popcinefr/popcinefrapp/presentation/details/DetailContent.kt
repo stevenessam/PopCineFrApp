@@ -1,4 +1,5 @@
-package com.popcinefr.popcinefrapp.presentation.detail
+package com.popcinefr.popcinefrapp.presentation.details
+
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
