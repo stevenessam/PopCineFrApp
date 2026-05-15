@@ -188,11 +188,44 @@ fun SpotlightSection(
     onItemClick: (MediaItem) -> Unit,
     onSeeAllClick: () -> Unit
 ) {
-    Column(
+    val infiniteTransition = rememberInfiniteTransition(label = "global_spotlight_fx")
+    
+    val glowOrbit by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2 * Math.PI.toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "glow_orbit"
+    )
+
+    val borderShift by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.9f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(6000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "border_shift"
+    )
+
+    val shineX by infiniteTransition.animateFloat(
+        initialValue = -500f,
+        targetValue = 1500f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(6000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shine_x"
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp)
     ) {
+        Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -330,6 +363,9 @@ fun SpotlightSection(
                         SpotlightCard(
                             item = item,
                             rank = actualIndex + 1,
+                            glowOrbit = glowOrbit,
+                            borderShift = borderShift,
+                            shineX = shineX,
                             onClick = { onItemClick(item) }
                         )
                     }
@@ -338,6 +374,7 @@ fun SpotlightSection(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
@@ -345,57 +382,63 @@ fun SpotlightSection(
 fun SpotlightCard(
     item: MediaItem,
     rank: Int,
+    glowOrbit: Float,
+    borderShift: Float,
+    shineX: Float,
     onClick: () -> Unit
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "spotlight_fx")
-    
-
-
-    // Rotating border intensity / glow shift - Slower and subtler
-    val borderShift by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "border_shift"
-    )
-
-    val shineX by infiniteTransition.animateFloat(
-        initialValue = -500f,
-        targetValue = 1500f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(5000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shine_x"
-    )
-
-
-
     Box(
         modifier = Modifier
             .width(320.dp)
             .height(200.dp),
         contentAlignment = Alignment.Center
     ) {
-        // 1. The Electric Halo Glow
+        // 1. The Bioluminescent Dual-Orbit Glow
         Box(
-            modifier = Modifier
-                .size(width = 270.dp, height = 150.dp)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f * borderShift),
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            Color.Transparent
-                        )
-                    ),
-                    shape = RoundedCornerShape(28.dp)
-                )
-                .blur(26.dp)
-        )
+            modifier = Modifier.size(width = 320.dp, height = 200.dp)
+        ) {
+            // Glow Emitter 1 (Top Left area)
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .align(Alignment.TopStart)
+                    .offset(
+                        x = (Math.cos(glowOrbit.toDouble()) * 20).dp,
+                        y = (Math.sin(glowOrbit.toDouble()) * 15).dp
+                    )
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.45f * borderShift),
+                                Color.Transparent
+                            )
+                        ),
+                        CircleShape
+                    )
+                    .blur(40.dp)
+            )
+
+            // Glow Emitter 2 (Bottom Right area)
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(
+                        x = (Math.sin(glowOrbit.toDouble()) * 25).dp,
+                        y = (Math.cos(glowOrbit.toDouble()) * 20).dp
+                    )
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f * borderShift),
+                                Color.Transparent
+                            )
+                        ),
+                        CircleShape
+                    )
+                    .blur(45.dp)
+            )
+        }
 
         // 2. The Main Card Body
         Box(
