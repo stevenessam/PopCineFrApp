@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -72,6 +73,7 @@ import com.popcinefr.popcinefrapp.data.remote.VideoDto
 import com.popcinefr.popcinefrapp.presentation.components.VidkingPlayer
 import com.popcinefr.popcinefrapp.presentation.components.YoutubePlayer
 import com.popcinefr.popcinefrapp.util.toImageUrl
+import com.popcinefr.popcinefrapp.presentation.components.MediaMetaPill
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -247,18 +249,19 @@ fun DetailContent(
                             horizontalArrangement = Arrangement.spacedBy(7.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            DetailMetaPill(
+                            MediaMetaPill(
                                 text = "${"%.1f".format(voteAverage)}/10",
-                                icon = Icons.Filled.Favorite
+                                icon = Icons.Filled.Star,
+                                iconColor = Color(0xFFFFD700) // Gold
                             )
                             if (!releaseDate.isNullOrEmpty()) {
-                                DetailMetaPill(
+                                MediaMetaPill(
                                     text = releaseDate.take(4),
                                     icon = Icons.Filled.CalendarToday
                                 )
                             }
                             if (!extraInfo.isNullOrEmpty()) {
-                                DetailMetaPill(
+                                MediaMetaPill(
                                     text = extraInfo,
                                     icon = if (isMovie) Icons.Filled.Videocam else null
                                 )
@@ -493,40 +496,6 @@ fun DetailContent(
     }
 }
 
-@Composable
-fun DetailMetaPill(
-    text: String,
-    icon: ImageVector? = null
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-        shape = RoundedCornerShape(50.dp),
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(12.dp)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-            }
-            Text(
-                text = text,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
 
 // --- Section Title with accent bar ---
 @Composable

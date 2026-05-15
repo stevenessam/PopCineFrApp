@@ -83,35 +83,14 @@ fun MediaCard(
                     )
             )
 
-            Box(
+            MediaMetaPill(
+                text = "${"%.1f".format(rating)}",
+                icon = Icons.Filled.Star,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(Color.Black.copy(alpha = 0.65f))
-                    .border(
-                        width = 1.dp,
-                        color = Color.White.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(50.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = Color(0xFFFFD700), // Gold
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${"%.1f".format(rating)}",
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+                    .padding(8.dp),
+                iconColor = Color(0xFFFFD700) // Gold
+            )
 
             Column(
                 modifier = Modifier
