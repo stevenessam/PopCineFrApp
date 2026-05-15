@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Tv
@@ -58,6 +60,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -941,6 +944,7 @@ fun GenreDropdown(
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
+        // Trigger button
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(18.dp))
@@ -963,37 +967,79 @@ fun GenreDropdown(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
             Icon(
-                imageVector = Icons.Filled.ArrowDropDown,
+                imageVector = if (expanded)
+                    Icons.Filled.KeyboardArrowUp
+                else
+                    Icons.Filled.ArrowDropDown,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(22.dp)
             )
         }
 
+        // Fix 1 — offset pushes it below the trigger instead of above
+        // Fix 2 — shadowElevation(0) + explicit background removes the black window
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            offset = DpOffset(x = 0.dp, y = 4.dp),
+            scrollState = rememberScrollState(),
+
+            shape = RoundedCornerShape(16.dp), // ← THIS is key
+            containerColor = MaterialTheme.colorScheme.surface, // ← background
+            tonalElevation = 0.dp, // optional (removes shadow tint)
+            shadowElevation = 0.dp, // optional
+
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-        ) {
+                .heightIn(max = 260.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(16.dp)
+                )
+        ){
             genres.forEach { genre ->
+                val isSelected = genre.id == selectedGenre.id
+
                 DropdownMenuItem(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (isSelected)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            else
+                                Color.Transparent
+                        ),
                     text = {
-                        Text(
-                            text = genre.name,
-                            fontWeight = if (genre.id == selectedGenre.id)
-                                FontWeight.Bold
-                            else
-                                FontWeight.Medium,
-                            color = if (genre.id == selectedGenre.id)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = genre.name,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold
+                                else FontWeight.Normal,
+                                color = if (isSelected)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                            )
+                            if (isSelected) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.primary,
+                                            CircleShape
+                                        )
+                                )
+                            }
+                        }
                     },
                     onClick = {
                         expanded = false
@@ -1004,7 +1050,6 @@ fun GenreDropdown(
         }
     }
 }
-
 @Composable
 fun <T> GenreMediaCarousel(
     uiState: UiState<List<T>>,
