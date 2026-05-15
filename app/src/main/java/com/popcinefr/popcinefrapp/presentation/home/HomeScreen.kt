@@ -409,7 +409,7 @@ fun SpotlightCard(
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.45f * borderShift),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.65f * borderShift),
                                 Color.Transparent
                             )
                         ),
@@ -430,7 +430,7 @@ fun SpotlightCard(
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f * borderShift),
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f * borderShift),
                                 Color.Transparent
                             )
                         ),
@@ -612,25 +612,52 @@ fun SpotlightCard(
                     )
                 }
             }
-        }
-
             // 3. THE POSTER — Now inside for a cleaner look
-            AsyncImage(
-                model = item.posterPath.toImageUrl("w185"),
-                contentDescription = item.title,
-                contentScale = ContentScale.Crop,
+            Box(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 12.dp)
-                    .width(78.dp)
-                    .height(115.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .border(
-                        width = 1.2.dp,
-                        color = Color.White.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(14.dp)
-                    )
-            )
+            ) {
+                // Poster Glow
+                Box(
+                    modifier = Modifier
+                        .size(width = 86.dp, height = 125.dp)
+                        .align(Alignment.Center)
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                    Color.Transparent
+                                )
+                            ),
+                            CircleShape
+                        )
+                        .blur(15.dp)
+                )
+
+                AsyncImage(
+                    model = item.posterPath.toImageUrl("w185"),
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(78.dp)
+                        .height(115.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(
+                            width = 1.2.dp,
+                            color = Color.White.copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                        .shadow(
+                            elevation = 6.dp,
+                            shape = RoundedCornerShape(14.dp),
+                            spotColor = Color.Black.copy(alpha = 0.4f)
+                        )
+                )
+            }
+        }
+
+
         }
     }
 
