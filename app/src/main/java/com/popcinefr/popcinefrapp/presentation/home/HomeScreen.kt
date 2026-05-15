@@ -194,7 +194,7 @@ fun SpotlightSection(
         initialValue = 0f,
         targetValue = 2 * Math.PI.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(18000, easing = LinearEasing),
+            animation = tween(36000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "glow_orbit"
@@ -204,7 +204,7 @@ fun SpotlightSection(
         initialValue = 0.72f,
         targetValue = 0.85f,
         animationSpec = infiniteRepeatable(
-            animation = tween(12000, easing = LinearEasing),
+            animation = tween(24000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "border_shift"
@@ -214,7 +214,7 @@ fun SpotlightSection(
         initialValue = -500f,
         targetValue = 1500f,
         animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
+            animation = tween(20000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "shine_x"
@@ -330,7 +330,7 @@ fun SpotlightSection(
                 LaunchedEffect(top10.size) {
                     if (top10.size <= 1) return@LaunchedEffect
                     while (true) {
-                        delay(2800L)
+                        delay(5000L)
                         val remainingPause = pauseUntil - System.currentTimeMillis()
                         if (remainingPause > 0L) delay(remainingPause)
                         if (!listState.isScrollInProgress) {
