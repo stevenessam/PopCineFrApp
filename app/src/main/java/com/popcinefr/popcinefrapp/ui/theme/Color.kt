@@ -2,17 +2,13 @@ package com.popcinefr.popcinefrapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFF8AB4FF)
-val PurpleGrey80 = Color(0xFFB7C8E8)
-val Pink80 = Color(0xFF8CE8FF)
+val PremiumBlue = Color(0xFF0EA5E9)
+val PremiumBlueDark = Color(0xFF0284C7)
+val PremiumSlate = Color(0xFF1E293B)
 
-val Purple40 = Color(0xFF1E63E9)
-val PurpleGrey40 = Color(0xFF31415F)
-val Pink40 = Color(0xFF0077B6)
-
-val PopCineDarkBackground = Color(0xFF07111F)
-val PopCineDarkSurface = Color(0xFF0D1B2F)
-val PopCineDarkSurfaceVariant = Color(0xFF17253A)
-val PopCineLightBackground = Color(0xFFF7FAFF)
+val PopCineDarkBackground = Color(0xFF01040A)
+val PopCineDarkSurface = Color(0xFF0A111E)
+val PopCineDarkSurfaceVariant = Color(0xFF151E2E)
+val PopCineLightBackground = Color(0xFFF8FAFC)
 val PopCineLightSurface = Color(0xFFFFFFFF)
-val PopCineLightSurfaceVariant = Color(0xFFEAF1FF)
+val PopCineLightSurfaceVariant = Color(0xFFF1F5F9)

@@ -193,13 +193,13 @@ fun SpotlightSection(
                     modifier = Modifier
                         .size(34.dp)
                         .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.72f)
-                                )
-                            ),
+                            Color.Black.copy(alpha = 0.45f),
                             RoundedCornerShape(10.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(10.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -383,7 +383,12 @@ fun SpotlightCard(
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(horizontal = 8.dp, vertical = 3.dp)
@@ -782,12 +787,12 @@ fun SectionWithIcon(
                 modifier = Modifier
                     .size(34.dp)
                     .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
-                            )
-                        ),
+                        color = Color.Black.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(11.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                         shape = RoundedCornerShape(11.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -887,12 +892,12 @@ fun GenreDropdownSection(
                 modifier = Modifier
                     .size(34.dp)
                     .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
-                            )
-                        ),
+                        color = Color.Black.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(11.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                         shape = RoundedCornerShape(11.dp)
                     ),
                 contentAlignment = Alignment.Center

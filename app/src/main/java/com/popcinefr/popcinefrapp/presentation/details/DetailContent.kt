@@ -110,14 +110,14 @@ fun DetailContent(
                             .padding(8.dp)
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                shape = CircleShape
-                            ),
+                        .background(
+                            Color.Black.copy(alpha = 0.45f)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = CircleShape
+                        ),
                         contentAlignment = Alignment.Center
                     ) {
                         IconButton(onClick = onBackClick) {
@@ -375,10 +375,12 @@ fun DetailContent(
                     modifier = Modifier
                         .size(46.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                        .background(
+                            Color.Black.copy(alpha = 0.45f)
+                        )
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                             shape = RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center
@@ -513,12 +515,12 @@ fun DetailSectionTitle(
             modifier = Modifier
                 .size(34.dp)
                 .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
-                        )
-                    ),
+                    color = Color.Black.copy(alpha = 0.4f),
+                    shape = RoundedCornerShape(11.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                     shape = RoundedCornerShape(11.dp)
                 ),
             contentAlignment = Alignment.Center

@@ -67,14 +67,14 @@ fun <T> SeeAllScreen(
                             .padding(8.dp)
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
-                                shape = CircleShape
-                            ),
+                        .background(
+                            Color.Black.copy(alpha = 0.45f)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            shape = CircleShape
+                        ),
                         contentAlignment = Alignment.Center
                     ) {
                         IconButton(onClick = onBackClick) {

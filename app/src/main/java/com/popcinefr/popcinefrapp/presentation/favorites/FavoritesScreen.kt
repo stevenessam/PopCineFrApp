@@ -121,15 +121,15 @@ fun FavoritesScreen(
                     Box(
                         modifier = Modifier
                             .size(72.dp)
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
-                                    )
-                                ),
-                                shape = RoundedCornerShape(20.dp)
-                            ),
+                        .background(
+                            color = Color.Black.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                            shape = RoundedCornerShape(20.dp)
+                        ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -283,12 +283,12 @@ fun FavoritesSectionHeader(
                 modifier = Modifier
                     .size(34.dp)
                     .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
-                            )
-                        ),
+                        color = Color.Black.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(11.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
                         shape = RoundedCornerShape(11.dp)
                     ),
                 contentAlignment = Alignment.Center
