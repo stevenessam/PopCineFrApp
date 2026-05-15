@@ -194,17 +194,17 @@ fun SpotlightSection(
         initialValue = 0f,
         targetValue = 2 * Math.PI.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
+            animation = tween(18000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "glow_orbit"
     )
 
     val borderShift by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 0.9f,
+        initialValue = 0.72f,
+        targetValue = 0.85f,
         animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing),
+            animation = tween(12000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "border_shift"
@@ -214,7 +214,7 @@ fun SpotlightSection(
         initialValue = -500f,
         targetValue = 1500f,
         animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing),
+            animation = tween(10000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "shine_x"
@@ -387,24 +387,29 @@ fun SpotlightCard(
     shineX: Float,
     onClick: () -> Unit
 ) {
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val centerX = with(density) { 143.dp.toPx() }
+    val centerY = with(density) { 83.dp.toPx() }
+    val orbitRadius = with(density) { 500.dp.toPx() }
+
     Box(
         modifier = Modifier
             .width(320.dp)
             .height(200.dp),
         contentAlignment = Alignment.Center
     ) {
-        // 1. The Bioluminescent Dual-Orbit Glow
+        // 1. THE REDESIGNED NEBULA GLOW (3 Layers)
         Box(
             modifier = Modifier.size(width = 320.dp, height = 200.dp)
         ) {
-            // Glow Emitter 1 (Top Left area)
+            // Layer 1: Deep Sapphire (Core)
             Box(
                 modifier = Modifier
-                    .size(160.dp)
-                    .align(Alignment.TopStart)
+                    .size(190.dp)
+                    .align(Alignment.Center)
                     .offset(
-                        x = (Math.cos(glowOrbit.toDouble()) * 20).dp,
-                        y = (Math.sin(glowOrbit.toDouble()) * 15).dp
+                        x = (Math.cos(glowOrbit.toDouble()) * 30).dp,
+                        y = (Math.sin(glowOrbit.toDouble()) * 20).dp
                     )
                     .background(
                         Brush.radialGradient(
@@ -415,28 +420,49 @@ fun SpotlightCard(
                         ),
                         CircleShape
                     )
-                    .blur(40.dp)
+                    .blur(45.dp)
             )
 
-            // Glow Emitter 2 (Bottom Right area)
+            // Layer 2: Vibrant Cyan (Accent)
             Box(
                 modifier = Modifier
-                    .size(180.dp)
-                    .align(Alignment.BottomEnd)
+                    .size(140.dp)
+                    .align(Alignment.TopStart)
                     .offset(
-                        x = (Math.sin(glowOrbit.toDouble()) * 25).dp,
-                        y = (Math.cos(glowOrbit.toDouble()) * 20).dp
+                        x = (Math.sin(glowOrbit.toDouble() * 1.5) * 40).dp,
+                        y = (Math.cos(glowOrbit.toDouble() * 1.5) * 30).dp
                     )
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f * borderShift),
+                                Color(0xFF06B6D4).copy(alpha = 0.35f * borderShift),
                                 Color.Transparent
                             )
                         ),
                         CircleShape
                     )
-                    .blur(45.dp)
+                    .blur(35.dp)
+            )
+
+            // Layer 3: Subtle Violet (Depth)
+            Box(
+                modifier = Modifier
+                    .size(160.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(
+                        x = (Math.cos(glowOrbit.toDouble() * 0.7) * (-40)).dp,
+                        y = (Math.sin(glowOrbit.toDouble() * 0.7) * (-30)).dp
+                    )
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF8B5CF6).copy(alpha = 0.25f * borderShift),
+                                Color.Transparent
+                            )
+                        ),
+                        CircleShape
+                    )
+                    .blur(40.dp)
             )
         }
 
@@ -453,22 +479,30 @@ fun SpotlightCard(
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                         )
                     ),
                     shape = RoundedCornerShape(26.dp)
                 )
                 .border(
-                    width = 1.6.dp,
+                    width = 1.8.dp,
                     brush = Brush.sweepGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.5f),
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            Color.White.copy(alpha = 0.45f), // Softer Laser Peak
                             MaterialTheme.colorScheme.primary,
-                            Color.White.copy(alpha = 0.5f)
+                            Color(0xFF0EA5E9), // Premium Blue
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                            Color.White.copy(alpha = 0.35f), // Softer Second Streak
+                            Color.Transparent
                         ),
-                        center = Offset(shineX / 2, 80f) // Dynamic center for sweep rotation effect
+                        center = Offset(
+                            centerX + Math.cos(glowOrbit.toDouble()).toFloat() * orbitRadius,
+                            centerY + Math.sin(glowOrbit.toDouble()).toFloat() * orbitRadius
+                        )
                     ),
                     shape = RoundedCornerShape(26.dp)
                 )
