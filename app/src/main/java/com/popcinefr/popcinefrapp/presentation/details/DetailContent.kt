@@ -6,6 +6,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Groups
@@ -71,7 +74,7 @@ import com.popcinefr.popcinefrapp.presentation.components.YoutubePlayer
 import com.popcinefr.popcinefrapp.util.toImageUrl
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DetailContent(
     tmdbId: Int,
@@ -158,7 +161,7 @@ fun DetailContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(330.dp)
+                    .height(340.dp)
                     .padding(horizontal = 16.dp, vertical = 10.dp)
                     .clip(RoundedCornerShape(26.dp))
                     .border(
@@ -220,7 +223,7 @@ fun DetailContent(
                             .clip(RoundedCornerShape(14.dp))
                             .border(
                                 width = 1.dp,
-                                color = Color.White.copy(alpha = 0.16f),
+                                color = Color.White.copy(alpha = 0.25f),
                                 shape = RoundedCornerShape(14.dp)
                             )
                     )
@@ -239,22 +242,34 @@ fun DetailContent(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(7.dp)
+                        FlowRow(
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            DetailMetaPill(text = "${"%.1f".format(voteAverage)}/10")
+                            DetailMetaPill(
+                                text = "${"%.1f".format(voteAverage)}/10",
+                                icon = Icons.Filled.Favorite
+                            )
                             if (!releaseDate.isNullOrEmpty()) {
-                                DetailMetaPill(text = releaseDate.take(4))
+                                DetailMetaPill(
+                                    text = releaseDate.take(4),
+                                    icon = Icons.Filled.CalendarToday
+                                )
                             }
                             if (!extraInfo.isNullOrEmpty()) {
-                                DetailMetaPill(text = extraInfo)
+                                DetailMetaPill(
+                                    text = extraInfo,
+                                    icon = if (isMovie) Icons.Filled.Videocam else null
+                                )
                             }
                         }
 
                         if (genres.isNotEmpty()) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
                                 val maxVisible = 2
                                 val visible = genres.take(maxVisible)
@@ -479,20 +494,37 @@ fun DetailContent(
 }
 
 @Composable
-fun DetailMetaPill(text: String) {
+fun DetailMetaPill(
+    text: String,
+    icon: ImageVector? = null
+) {
     Surface(
         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-        shape = RoundedCornerShape(50.dp)
+        shape = RoundedCornerShape(50.dp),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
     ) {
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
-        )
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(12.dp)
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+            }
+            Text(
+                text = text,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
