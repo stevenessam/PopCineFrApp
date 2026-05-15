@@ -530,22 +530,12 @@ fun SpotlightCard(
                     )
             )
 
-            // Ghost rank number
-            Text(
-                text = "$rank",
-                fontSize = 110.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.White.copy(alpha = 0.1f),
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .offset(x = (-10).dp, y = 20.dp)
-            )
 
             // Info Column
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 14.dp, end = 90.dp, bottom = 14.dp)
+                    .padding(start = 14.dp, end = 100.dp, bottom = 14.dp)
             ) {
                 // Rank badge
                 Box(
@@ -562,7 +552,7 @@ fun SpotlightCard(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "RANK #$rank",
+                        text = "#$rank",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary,
